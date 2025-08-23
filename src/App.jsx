@@ -604,20 +604,30 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
 
     // Definisikan fungsi-fungsi di dalam useEffect
     const loadTask = async () => {
-      if (!taskId) return;
-      const { data } = await supabase.from('tasks')
-        .select('*, categories:category_id(name), class:class_id(name)')
-        .eq('id', taskId)
-        .single();
-      setTask(data);
-    };
+  if (!taskId) return;
+  const { data, error } = await supabase.from('tasks')
+    .select(`
+      *,
+      categories:category_id(name),
+      class:class_id(name),
+      assigned_by:assigned_by(username)
+    `)
+    .eq('id', taskId)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+  setTask(data);
+};
 
     const loadMessages = async () => {
       if (!taskId) return;
       const { data } = await supabase.from('messages')
-        .select('*')
+        .select('id, text, created_at, profiles(username)')
         .eq('task_id', taskId)
-        .order('created_at');
+        .order('created_at', { ascending: true });
       setMessages(data || []);
     };
 
@@ -735,7 +745,7 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
             <div style={{maxHeight:280,overflow:'auto',marginTop:8}}>
               {messages.map(m => (
                 <div key={m.id} className="item" style={{marginBottom:8}}>
-                  <div className="small muted">{m.sender_id} • {dayjs(m.created_at).format('DD MMM HH:mm')}</div>
+                  <div className="small muted">{m.profiles?.username} • {dayjs(m.created_at).format('DD MMM HH:mm')}</div>
                   <div>{m.text}</div>
                 </div>
               ))}
