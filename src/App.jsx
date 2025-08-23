@@ -785,28 +785,35 @@ const loadSubs = useCallback(async () => {
             
             <div className="col" style={{marginTop:10}}>
               <div className="title" style={{fontSize:14}}>Pengumpulan</div>
-              {subs.map(s => (
-              {subs.length === 0 && profile.role === 'student' && (
-  <div className="muted small">Belum ada pengumpulan tugas yang dapat dilihat.</div>
+              {/* Tampilkan pesan jika tidak ada pengumpulan tugas */}
+{subs.length === 0 ? (
+  <div className="muted small">
+    {profile.role === 'student' 
+      ? "Belum ada pengumpulan tugas yang dapat dilihat." 
+      : "Belum ada pengumpulan tugas."}
+  </div>
+) : (
+  {/* Tampilkan daftar pengumpulan tugas jika ada */}
+  subs.map(s => (
+    <div key={s.id} className="item">
+      <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
+      {s.text && <div style={{marginTop:6}}>{s.text}</div>}
+      {Array.isArray(s.files) && s.files.length > 0 && (
+        <div className="thumbs" style={{marginTop:8}}>
+          {s.files.map((f,i) => 
+            f?.path ? <MediaThumb key={i} file={f} /> : null
+          )}
+        </div>
+      )}
+      <div className="row" style={{marginTop:8,justifyContent:'space-between'}}>
+        <div className="small">Nilai: <strong>{s.grade ?? '-'}</strong></div>
+        {profile.role === 'teacher' && (
+          <input type="number" className="small" placeholder="Nilai" onBlur={e => grade(s.id, parseFloat(e.target.value))} />
+        )}
+      </div>
+    </div>
+  ))
 )}
-                <div key={s.id} className="item">
-                  <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
-                  {s.text && <div style={{marginTop:6}}>{s.text}</div>}
-                  {Array.isArray(s.files) && s.files.length > 0 && (
-                    <div className="thumbs" style={{marginTop:8}}>
-                      {s.files.map((f,i) => 
-                        f?.path ? <MediaThumb key={i} file={f} /> : null
-                      )}
-                    </div>
-                  )}
-                  <div className="row" style={{marginTop:8,justifyContent:'space-between'}}>
-                    <div className="small">Nilai: <strong>{s.grade ?? '-'}</strong></div>
-                    {profile.role === 'teacher' && (
-                      <input type="number" className="small" placeholder="Nilai" onBlur={e => grade(s.id, parseFloat(e.target.value))} />
-                    )}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
