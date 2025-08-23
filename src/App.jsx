@@ -427,7 +427,7 @@ function Home({ profile }){
           <div className="badge">WIB {dayjs().utcOffset(7).format('HH:mm')}</div>
         </div>
         <div className="row" style={{marginTop:12,gap:8,flexWrap:'wrap'}}>
-          <span className="chip">Kelas: {profile?.class_id || '-'}</span>
+          <span className="chip">Kelas: {profile?.classes?.name || '-'}</span>
           <span className="chip">Peran: {profile?.role}</span>
           <span className="chip">Upload ≤ 45 MB</span>
         </div>
