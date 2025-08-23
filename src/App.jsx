@@ -453,7 +453,10 @@ function TasksPage({ profile, onTaskSelect }){
 
   useEffect(()=>{ load(); const sub = supabase.channel('realtime:tasks').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>load()).subscribe(); return ()=>supabase.removeChannel(sub); },[]);
   async function load(){
-    const { data:t } = await supabase.from('tasks').select('*, categories:category_id(name), class:class_id(name)').order('created_at',{ascending:false});
+  const { data:t } = await supabase.from('tasks')
+  .select('*, categories:category_id(name), classes:class_id(name)') // Ubah dari class ke classes
+  .order('created_at',{ascending:false});
+    // const { data:t } = await supabase.from('tasks').select('*, categories:category_id(name), class:class_id(name)').order('created_at',{ascending:false});
     const { data: c }= await supabase.from('categories').select('*').order('name');
     const { data: cs }= await supabase.from('classes').select('*').order('name');
     setTasks(t||[]); setCats(c||[]); setClasses(cs||[]);
@@ -615,18 +618,18 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
     const loadMessages = async () => {
       if (!taskId) return;
       const { data } = await supabase.from('messages')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('created_at');
+  .select('*, profiles:sender_id(username)') // Tambahkan relasi profiles
+  .eq('task_id', taskId)
+  .order('created_at');
       setMessages(data || []);
     };
 
     const loadSubs = async () => {
       if (!taskId) return;
       const { data } = await supabase.from('submissions')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('submitted_at', {ascending: false});
+  .select('*, profiles:student_id(username)') // Tambahkan relasi profiles
+  .eq('task_id', taskId)
+  .order('submitted_at', {ascending: false});
       setSubs(data || []);
     };
 
@@ -735,7 +738,7 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
             <div style={{maxHeight:280,overflow:'auto',marginTop:8}}>
               {messages.map(m => (
                 <div key={m.id} className="item" style={{marginBottom:8}}>
-                  <div className="small muted">{m.sender_id} • {dayjs(m.created_at).format('DD MMM HH:mm')}</div>
+                  <div className="small muted">{m.profiles?.username || 'Unknown'} • {dayjs(m.created_at).format('DD MMM HH:mm')}</div>
                   <div>{m.text}</div>
                 </div>
               ))}
@@ -758,7 +761,7 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
               <div className="title" style={{fontSize:14}}>Pengumpulan</div>
               {subs.map(s => (
                 <div key={s.id} className="item">
-                  <div className="small muted">{s.student_id || 'oleh guru'} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
+                  <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
                   {s.text && <div style={{marginTop:6}}>{s.text}</div>}
                   {Array.isArray(s.files) && s.files.length > 0 && (
                     <div className="thumbs" style={{marginTop:8}}>
