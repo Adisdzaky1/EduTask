@@ -617,6 +617,8 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
   const [msg, setMsg] = useState('');
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
+const messagesEndRef = useRef(null); // Tambahkan ref untuk scroll otomatis
+  
 const loadSubs = useCallback(async () => {
   if (!taskId) return;
   
