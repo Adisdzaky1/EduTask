@@ -781,7 +781,7 @@ return (
                         Guru
                       </span>
                     )}
-                    • {dayjs(m.created_at).format('DD MMM HH:mm')}
+                    •| {dayjs(m.created_at).format('DD MMM HH:mm')}
                   </div>
                   <div>{m.text}</div>
                 </div>
