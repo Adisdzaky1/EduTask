@@ -744,7 +744,7 @@ const loadSubs = useCallback(async () => {
 
   const gallery = (subs?.[0]?.files || []).slice(0, 4);
 
-  return (
+return (
     <div className="col">
       <div className="card pop" style={{padding:12}}>
         <div className="row" style={{justifyContent:'space-between', alignItems: 'center'}}>
@@ -772,29 +772,28 @@ const loadSubs = useCallback(async () => {
             <div className="title">Diskusi</div>
             <div style={{maxHeight:280,overflow:'auto',marginTop:8}}>
               {messages.map(m => (
-              <div key={m.id} className="item" style={{marginBottom:8}}>
-                {/* Tampilkan badge untuk guru */}
-                <div className="small muted">
-                  {m.profiles?.username || 'Unknown'}
-                  {m.profiles?.role === 'teacher' && (
-                    <span className="badge" style={{marginLeft: 8, background: 'rgba(108, 139, 255, 0.12)', borderColor: 'rgba(108, 139, 255, 0.25)'}}>
-                      Guru
-                    </span>
-                  )}
-     • {dayjs(m.created_at).format('DD MMM HH:mm')}
+                <div key={m.id} className="item" style={{marginBottom:8}}>
+                  {/* Tampilkan badge untuk guru - PERBAIKAN: Hapus duplikasi username */}
+                  <div className="small muted">
+                    {m.profiles?.username || 'Unknown'}
+                    {m.profiles?.role === 'teacher' && (
+                      <span className="badge" style={{marginLeft: 8, background: 'rgba(108, 139, 255, 0.12)', borderColor: 'rgba(108, 139, 255, 0.25)'}}>
+                        Guru
+                      </span>
+                    )}
+                    • {dayjs(m.created_at).format('DD MMM HH:mm')}
+                  </div>
+                  <div>{m.text}</div>
                 </div>
-                <div>{m.text}</div>
-              </div>
-            ))}
-            
-             {/* Elemen untuk scroll otomatis */}
-            <div ref={messagesEndRef} />
+              ))}
+              {/* Elemen untuk scroll otomatis */}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="row" style={{marginTop:8}}>
+              <input placeholder="Tulis pesan..." value={msg} onChange={e=>setMsg(e.target.value)} />
+              <button className="btn" onClick={send}>Kirim</button>
+            </div>
           </div>
-          <div className="row" style={{marginTop:8}}>
-            <input placeholder="Tulis pesan..." value={msg} onChange={e=>setMsg(e.target.value)} />
-            <button className="btn" onClick={send}>Kirim</button>
-          </div>
-        </div>
 
           <div className="card" style={{padding:12}}>
             <div className="title">Kirim Tugas</div>
@@ -806,11 +805,10 @@ const loadSubs = useCallback(async () => {
             
             <div className="col" style={{marginTop:10}}>
               <div className="title" style={{fontSize:14}}>Pengumpulan</div>
-               {subs.length === 0 && profile.role === 'student' && (
-  <div className="muted small">Belum ada pengumpulan tugas yang dapat dilihat.</div>
-)}
+              {subs.length === 0 && profile.role === 'student' && (
+                <div className="muted small">Belum ada pengumpulan tugas yang dapat dilihat.</div>
+              )}
               {subs.map(s => (
-             
                 <div key={s.id} className="item">
                   <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
                   {s.text && <div style={{marginTop:6}}>{s.text}</div>}
@@ -840,6 +838,7 @@ const loadSubs = useCallback(async () => {
       </div>
     </div>
   );
+  
 }
 
 // -----------------------------------------------------
