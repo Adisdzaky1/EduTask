@@ -779,12 +779,12 @@ const loadSubs = useCallback(async () => {
                       Guru
                     </span>
                   )}
-                 {m.profiles?.username || 'Unknown'} • {dayjs(m.created_at).format('DD MMM HH:mm')}
+     • {dayjs(m.created_at).format('DD MMM HH:mm')}
                 </div>
                 <div>{m.text}</div>
               </div>
             ))}
-            </div>
+            
              {/* Elemen untuk scroll otomatis */}
             <div ref={messagesEndRef} />
           </div>
