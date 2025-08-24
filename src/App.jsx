@@ -617,7 +617,23 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
   const [msg, setMsg] = useState('');
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
+const loadSubs = useCallback(async () => {
+  if (!taskId) return;
+  
+  let query = supabase
+    .from('submissions')
+    .select(`*, profiles:student_id(username)`)
+    .eq('task_id', taskId);
 
+  // Jika user adalah siswa, hanya tampilkan submission miliknya sendiri
+  if (profile.role === 'student') {
+    query = query.eq('student_id', profile.id);
+  }
+
+  const { data } = await query.order('submitted_at', { ascending: false });
+  setSubs(data || []);
+}, [taskId, profile.id, profile.role]);
+  
   useEffect(() => {
     if (!taskId) return;
 
@@ -639,25 +655,7 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
   .order('created_at');
       setMessages(data || []);
     };
-
-const loadSubs = useCallback(async () => {
-  if (!taskId) return;
   
-  let query = supabase
-    .from('submissions')
-    .select(`*, profiles:student_id(username)`)
-    .eq('task_id', taskId);
-
-  // Jika user adalah siswa, hanya tampilkan submission miliknya sendiri
-  if (profile.role === 'student') {
-    query = query.eq('student_id', profile.id);
-  }
-
-  const { data } = await query.order('submitted_at', { ascending: false });
-  setSubs(data || []);
-}, [taskId, profile.id, profile.role]);
-
-    
   loadTask();
   loadMessages();
   loadSubs();
