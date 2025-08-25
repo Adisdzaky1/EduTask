@@ -775,7 +775,7 @@ const messagesEndRef = useRef(null);
             <div ref={messagesContainerRef} style={{maxHeight:280,overflow:'auto',marginTop:8}}>
               {messages.map(m => (
               <div key={m.id} className="item" style={{marginBottom:8}}>
-                {/* Tampilkan badge untuk guru */}
+              
                 <div className="small muted">
                     {m.profiles?.username || 'Unknown'}
                     {m.profiles?.role === 'teacher' && (
@@ -785,7 +785,7 @@ const messagesEndRef = useRef(null);
                         borderColor: 'rgba(108, 139, 255, 0.25)',
                         color: '#6c8bff'
                       }}>
-                        Guru
+                        Guruu •
                       </span>
                     )}
                     • {dayjs(m.created_at).format('DD MMM HH:mm')}
