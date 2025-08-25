@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-
+import 'splash.jsx';
 // ---- Dayjs Fix ----
 import dayjsLib from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -324,7 +324,7 @@ function BottomNav({ tab, setTab, role }){
 // -----------------------------------------------------
 // Ganti komponen Splash dengan yang baru
 // Ganti komponen Splash dengan yang ini
-function Splash(){
+function Splashhjjhh(){
   return (
     <div style={{
       display: 'flex',
