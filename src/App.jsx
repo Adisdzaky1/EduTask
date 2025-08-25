@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import 'splash.jsx';
+import './splash.jsx';
 // ---- Dayjs Fix ----
 import dayjsLib from "dayjs";
 import utc from "dayjs/plugin/utc";
