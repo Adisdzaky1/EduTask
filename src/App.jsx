@@ -256,37 +256,6 @@ function GlobalStyles(){
 
       /* Animations */
  /* Animasi untuk splash screen dan komponen lainnya */
-      @keyframes pulse {
-        0% { transform: scale(0.95); opacity: 0.7; }
-        50% { transform: scale(1.05); opacity: 1; }
-        100% { transform: scale(0.95); opacity: 0.7; }
-      }
-      
-      @keyframes rotate {
-        0% { transform: rotate(0deg); }
-        50% { transform: rotate(180deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-      }
-      
-      @keyframes bounce {
-        0%, 80%, 100% { 
-          transform: scale(0);
-        } 
-        40% { 
-          transform: scale(1);
-        }
-      }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      
       
       
       @keyframes pop{0%{transform:scale(.96);opacity:.0}100%{transform:scale(1);opacity:1}}
