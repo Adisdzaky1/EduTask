@@ -361,6 +361,140 @@ function Splash(){
       display: 'grid',
       placeItems: 'center',
       height: '100vh',
+      background: 'radial-gradient(ellipse at center, var(--brand) 0%, var(--bg) 70%)',
+      overflow: 'hidden',
+      position: 'relative'
+    }}>
+      {/* Element dekoratif */}
+      <div style={{
+        position: 'absolute',
+        top: '20%',
+        left: '10%',
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        background: 'rgba(126, 247, 209, 0.15)',
+        filter: 'blur(20px)',
+        animation: 'float 8s ease-in-out infinite'
+      }}></div>
+      
+      <div style={{
+        position: 'absolute',
+        bottom: '30%',
+        right: '15%',
+        width: '120px',
+        height: '120px',
+        borderRadius: '50%',
+        background: 'rgba(108, 139, 255, 0.15)',
+        filter: 'blur(25px)',
+        animation: 'float 10s ease-in-out infinite 1s'
+      }}></div>
+      
+      <div style={{
+        position: 'absolute',
+        top: '40%',
+        right: '20%',
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        background: 'rgba(255, 255, 255, 0.1)',
+        filter: 'blur(15px)',
+        animation: 'float 12s ease-in-out infinite 2s'
+      }}></div>
+
+      <div className="col" style={{alignItems: 'center', zIndex: 2}}>
+        {/* Logo dengan animasi */}
+        <div style={{
+          width: 80,
+          height: 80,
+          borderRadius: '20px',
+          background: 'conic-gradient(from 180deg at 50% 50%, var(--brand), var(--brand-2))',
+          boxShadow: '0 0 40px rgba(108, 139, 255, 0.5), 0 0 80px rgba(126, 247, 209, 0.3)',
+          marginBottom: '20px',
+          animation: 'pulse 2s ease-in-out infinite, rotate 10s linear infinite'
+        }}></div>
+        
+        {/* Teks dengan animasi */}
+        <div style={{
+          fontSize: '24px',
+          fontWeight: '800',
+          background: 'linear-gradient(135deg, var(--brand), var(--brand-2))',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+          marginBottom: '8px'
+        }}>EduTask</div>
+        
+        <div style={{
+          opacity: 0.8,
+          animation: 'fadeInOut 2s ease-in-out infinite',
+          fontSize: '14px'
+        }}>Memuat aplikasi...</div>
+        
+        {/* Loading bar */}
+        <div style={{
+          width: '200px',
+          height: '4px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '10px',
+          marginTop: '20px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(90deg, var(--brand), var(--brand-2))',
+            borderRadius: '10px',
+            animation: 'loading 2s ease-in-out infinite'
+          }}></div>
+        </div>
+      </div>
+
+      {/* Tambahkan style animasi */}
+      <style>
+        {`
+          @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 40px rgba(108, 139, 255, 0.5), 0 0 80px rgba(126, 247, 209, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(108, 139, 255, 0.7), 0 0 100px rgba(126, 247, 209, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 40px rgba(108, 139, 255, 0.5), 0 0 80px rgba(126, 247, 209, 0.3); }
+          }
+          
+          @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          
+          @keyframes fadeInOut {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+          }
+          
+          @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+          
+          @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+}
+
+
+
+
+function Splayyysh(){
+  return (
+    <div style={{
+      display: 'grid',
+      placeItems: 'center',
+      height: '100vh',
       background: 'radial-gradient(1200px 600px at 50% -20%,#17203f 0%,#0b1020 60%)'
     }}>
       <div className="col" style={{alignItems: 'center', gap: '20px'}}>
