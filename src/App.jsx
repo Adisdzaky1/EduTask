@@ -512,7 +512,7 @@ function Splayyysh(){
           position: 'relative',
           fontSize: '24px',
           fontWeight: '800',
-    h      color: 'var(--text)',
+          color: 'var(--text)',
           textAlign: 'center'
         }}>
           EduTask
