@@ -772,7 +772,7 @@ const messagesEndRef = useRef(null);
         <div className="grid grid-2" style={{marginTop:12}}>
           <div className="card" style={{padding:12}}>
             <div className="title">Diskusi</div>
-            <div style={{maxHeight:280,overflow:'auto',marginTop:8}}>
+            <div ref={messagesContainerRef} style={{maxHeight:280,overflow:'auto',marginTop:8}}>
               {messages.map(m => (
               <div key={m.id} className="item" style={{marginBottom:8}}>
                 {/* Tampilkan badge untuk guru */}
