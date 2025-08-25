@@ -355,7 +355,7 @@ function BottomNav({ tab, setTab, role }){
 // -----------------------------------------------------
 // Ganti komponen Splash dengan yang baru
 // Ganti komponen Splash dengan yang ini
-function Splash(){
+ function Splash(){
   return (
     <div style={{
       display: 'grid',
@@ -485,8 +485,7 @@ function Splash(){
     </div>
   );
 }
-
-
+ 
 
 
 function Splayyysh(){
@@ -513,7 +512,7 @@ function Splayyysh(){
           position: 'relative',
           fontSize: '24px',
           fontWeight: '800',
-          color: 'var(--text)',
+    h      color: 'var(--text)',
           textAlign: 'center'
         }}>
           EduTask
