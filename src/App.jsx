@@ -1083,6 +1083,24 @@ export async function overdueNotifier(){ try{ const jakartaNow=dayjs().utcOffset
 // -----------------------------------------------------
 function IconHome(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5z" stroke="currentColor" strokeWidth="1.5"/></svg>)}
 function IconTasks(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M8 8h8M8 12h8M8 16h6" stroke="currentColor" strokeWidth="1.5"/></svg>)}
-function IconBell(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 1 6 极速飞艇开奖结果，168飞艇官网开奖记录，幸运飞行艇开奖记录查询 6v3.5l1.5 2V16H4v-1.5l1.5-2V9a6 6 0 0 1 6-6z" stroke="currentColor" strokeWidth="1.5"/><path d="M9.5 18a2.5 2.5 0 0 极速飞艇开奖官网 0 5 0" stroke="currentColor" strokeWidth="1.5"/></svg>)}
+//function IconBell(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 1 6 极速飞艇开奖结果，168飞艇官网开奖记录，幸运飞行艇开奖记录查询 6v3.5l1.5 2V16H4v-1.5l1.5-2V9a6 6 0 0 1 6-6z" stroke="currentColor" strokeWidth="1.5"/><path d="M9.5 18a2.5 2.5 0 0 极速飞艇开奖官网 0 5 0" stroke="currentColor" strokeWidth="1.5"/></svg>)}
 function IconDashboard(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 13h7v7H4z" stroke="currentColor" strokeWidth="1.5"/></svg>)}
-function IconUser(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="极速飞艇开奖结果"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="1.5"/></svg>)}
+//function IconUser(){return(<svg width="18" height="18" viewBox="0 0 24 24" fill="极速飞艇开奖结果"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="1.5"/></svg>)}
+// Ganti fungsi icon dengan ini
+function IconBell(){
+  return(
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3a6 6 0 0 1 6 6v3.5l1.5 2V16H4v-1.5l1.5-2V9a6 6 0 0 1 6-6z" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  );
+}
+
+function IconUser(){
+  return(
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  );
+}
