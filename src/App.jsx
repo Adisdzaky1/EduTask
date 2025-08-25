@@ -355,7 +355,92 @@ function BottomNav({ tab, setTab, role }){
 // -----------------------------------------------------
 // Ganti komponen Splash dengan yang baru
 // Ganti komponen Splash dengan yang ini
- function Splash(){
+
+
+function Splash(){
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      background: 'radial-gradient(1200px 600px at 50% -20%,#17203f 0%,#0b1020 60%)'
+    }}>
+      <div className="col" style={{alignItems: 'center', gap: '20px'}}>
+        {/* Logo dengan animasi */}
+        <div style={{
+          width: 70,
+          height: 70,
+          borderRadius: '16px',
+          background: 'conic-gradient(from 180deg at 50% 50%, var(--brand), var(--brand-2))',
+          boxShadow: '0 6px 30px rgba(110, 150, 255, 0.5)',
+          animation: 'pulse 2s infinite ease-in-out'
+        }}/>
+        
+        {/* Teks dengan animasi */}
+        <div style={{
+          color: 'var(--text)',
+          fontSize: '18px',
+          fontWeight: '600',
+          opacity: 0.9,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span>Memuat EduTask</span>
+          <span style={{
+            display: 'inline-flex',
+            animation: 'dots 1.5s infinite steps(4)'
+          }}>
+            <span>.</span>
+            <span style={{animationDelay: '0.2s'}}>.</span>
+            <span style={{animationDelay: '0.4s'}}>.</span>
+          </span>
+        </div>
+        
+        {/* Progress bar subtle */}
+        <div style={{
+          width: '120px',
+          height: '3px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '3px',
+          overflow: 'hidden',
+          marginTop: '10px'
+        }}>
+          <div style={{
+            width: '40%',
+            height: '100%',
+            background: 'linear-gradient(90deg, var(--brand), var(--brand-2))',
+            borderRadius: '3px',
+            animation: 'loading 1.5s infinite ease-in-out'
+          }}/>
+        </div>
+      </div>
+
+      {/* Tambahkan animasi ke GlobalStyles */}
+      <style>{`
+        @keyframes pulse {
+          0% { transform: scale(0.95); opacity: 0.7; }
+          50% { transform: scale(1.05); opacity: 1; }
+          100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        
+        @keyframes dots {
+          0% { opacity: 0.2; }
+          50% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
+        
+        @keyframes loading {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(250%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+ function Splasyyyuuuh(){
   return (
     <div style={{
       display: 'grid',
