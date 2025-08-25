@@ -76,7 +76,7 @@ export default function Splash() {
                   />
                 </div>
                 <div className="w-full flex items-center justify-between mt-2 text-xs text-white/90">
-                  <div>Memuat EduTask...</div>
+                  <div>Memuat EduTask....</div>
                   <div>{progress}%</div>
                 </div>
               </div>
