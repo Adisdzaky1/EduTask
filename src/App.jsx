@@ -355,9 +355,111 @@ function BottomNav({ tab, setTab, role }){
 // -----------------------------------------------------
 // Ganti komponen Splash dengan yang baru
 // Ganti komponen Splash dengan yang ini
-
-
 function Splash(){
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      background: 'radial-gradient(1200px 600px at 50% -20%,#17203f 0%,#0b1020 60%)'
+    }}>
+      <div className="col" style={{alignItems: 'center', gap: '24px'}}>
+        {/* Logo dengan animasi berputar */}
+        <div style={{
+          position: 'relative',
+          width: 80,
+          height: 80,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          {/* Lingkaran luar berputar */}
+          <div style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTop: '3px solid var(--brand)',
+            borderRight: '3px solid var(--brand-2)',
+            animation: 'spin 1.5s linear infinite'
+          }}/>
+          
+          {/* Lingkaran dalam berputar berlawanan arah */}
+          <div style={{
+            position: 'absolute',
+            width: '70%',
+            height: '70%',
+            borderRadius: '50%',
+            border: '2px solid transparent',
+            borderBottom: '2px solid var(--brand-2)',
+            borderLeft: '2px solid var(--brand)',
+            animation: 'spinReverse 1.2s linear infinite'
+          }}/>
+          
+          {/* Logo pusat */}
+          <div style={{
+            width: '40%',
+            height: '40%',
+            borderRadius: '8px',
+            background: 'conic-gradient(from 180deg at 50% 50%, var(--brand), var(--brand-2))',
+            boxShadow: '0 0 20px rgba(110, 150, 255, 0.5)'
+          }}/>
+        </div>
+        
+        {/* Teks dengan fade in/out */}
+        <div style={{
+          color: 'var(--text)',
+          fontSize: '18px',
+          fontWeight: '600',
+          letterSpacing: '0.5px',
+          animation: 'fade 2s ease-in-out infinite'
+        }}>
+          Memuat EduTask
+        </div>
+        
+        {/* Subtle glow effect */}
+        <div style={{
+          position: 'absolute',
+          bottom: '30%',
+          width: '200px',
+          height: '20px',
+          background: 'radial-gradient(ellipse at center, rgba(108, 139, 255, 0.3) 0%, transparent 70%)',
+          filter: 'blur(5px)',
+          animation: 'pulseGlow 3s ease-in-out infinite'
+        }}/>
+      </div>
+
+      {/* Tambahkan animasi ke GlobalStyles */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes spinReverse {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+        
+        @keyframes fade {
+          0% { opacity: 0.7; }
+          50% { opacity: 1; }
+          100% { opacity: 0.7; }
+        }
+        
+        @keyframes pulseGlow {
+          0% { opacity: 0.3; width: 200px; }
+          50% { opacity: 0.6; width: 220px; }
+          100% { opacity: 0.3; width: 200px; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Splaxnxjxjsh(){
   return (
     <div style={{
       display: 'flex',
