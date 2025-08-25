@@ -663,7 +663,7 @@ const messagesEndRef = useRef(null);
     const loadMessages = async () => {
       if (!taskId) return;
       const { data } = await supabase.from('messages')
-  .select('*, profiles:sender_id(username)') // Tambahkan relasi profiles
+  .select('*, profiles:sender_id(username, role)') // Tambahkan relasi profiles
   .eq('task_id', taskId)
   .order('created_at');
       setMessages(data || []);
