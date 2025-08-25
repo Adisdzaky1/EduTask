@@ -255,6 +255,40 @@ function GlobalStyles(){
       @media(min-width:800px){.grid-2{grid-template-columns:2fr 1fr}}
 
       /* Animations */
+ /* Animasi untuk splash screen dan komponen lainnya */
+      @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.7; }
+      }
+      
+      @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        50% { transform: rotate(180deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      
+      @keyframes bounce {
+        0%, 80%, 100% { 
+          transform: scale(0);
+        } 
+        40% { 
+          transform: scale(1);
+        }
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      
+      
       @keyframes pop{0%{transform:scale(.96);opacity:.0}100%{transform:scale(1);opacity:1}}
       .pop{animation:pop .18s ease-out}
       @keyframes slideUp{0%{transform:translateY(10px);opacity:.0}100%{transform:translateY(0);opacity:1}}
@@ -319,13 +353,106 @@ function BottomNav({ tab, setTab, role }){
 // -----------------------------------------------------
 // Splash
 // -----------------------------------------------------
+// Ganti komponen Splash dengan yang baru
 function Splash(){
   return (
-    <div style={{display:'grid',placeItems:'center',height:'100vh'}}>
-      <div className="col" style={{alignItems:'center'}}>
-        <div className="logo-badge" style={{width:56,height:56}}/>
-        <div style={{opacity:.8}}>Memuat EduTask...</div>
+    <div style={{
+      display: 'grid',
+      placeItems: 'center',
+      height: '100vh',
+      background: 'radial-gradient(1200px 600px at 50% -20%,#17203f 0%,#0b1020 60%)'
+    }}>
+      <div className="col" style={{alignItems: 'center', gap: '20px'}}>
+        {/* Logo dengan animasi */}
+        <div 
+          className="logo-badge" 
+          style={{
+            width: 70, 
+            height: 70,
+            animation: 'pulse 2s infinite, rotate 3s ease-in-out infinite'
+          }}
+        />
+        
+        {/* Teks dengan animasi typing */}
+        <div style={{
+          position: 'relative',
+          fontSize: '24px',
+          fontWeight: '800',
+          color: 'var(--text)',
+          textAlign: 'center'
+        }}>
+          EduTask
+          <span style={{
+            content: '""',
+            position: 'absolute',
+            right: -10,
+            top: '50%',
+            height: '24px',
+            width: '2px',
+            background: 'var(--brand)',
+            transform: 'translateY(-50%)',
+            animation: 'blink 1s infinite'
+          }}></span>
+        </div>
+        
+        {/* Loading dots */}
+        <div style={{display: 'flex', gap: '4px'}}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'var(--brand)',
+            animation: 'bounce 1.4s infinite ease-in-out both',
+            animationDelay: '-0.32s'
+          }}></div>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'var(--brand)',
+            animation: 'bounce 1.4s infinite ease-in-out both',
+            animationDelay: '-0.16s'
+          }}></div>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'var(--brand)',
+            animation: 'bounce 1.4s infinite ease-in-out both'
+          }}></div>
+        </div>
+        
+        <div style={{opacity: 0.8, marginTop: '10px'}}>Memuat aplikasi...</div>
       </div>
+      
+      {/* Tambahkan animasi ke GlobalStyles */}
+      <style>{`
+        @keyframes pulse {
+          0% { transform: scale(0.95); opacity: 0.7; }
+          50% { transform: scale(1.05); opacity: 1; }
+          100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        
+        @keyframes rotate {
+          0% { transform: rotate(0deg); }
+          50% { transform: rotate(180deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        
+        @keyframes bounce {
+          0%, 80%, 100% { 
+            transform: scale(0);
+          } 
+          40% { 
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }
