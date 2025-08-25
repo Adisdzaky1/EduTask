@@ -354,6 +354,7 @@ function BottomNav({ tab, setTab, role }){
 // Splash
 // -----------------------------------------------------
 // Ganti komponen Splash dengan yang baru
+// Ganti komponen Splash dengan yang ini
 function Splash(){
   return (
     <div style={{
@@ -383,7 +384,6 @@ function Splash(){
         }}>
           EduTask
           <span style={{
-            content: '""',
             position: 'absolute',
             right: -10,
             top: '50%',
@@ -424,44 +424,18 @@ function Splash(){
         
         <div style={{opacity: 0.8, marginTop: '10px'}}>Memuat aplikasi...</div>
       </div>
-      
-      {/* Tambahkan animasi ke GlobalStyles */}
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(0.95); opacity: 0.7; }
-          50% { transform: scale(1.05); opacity: 1; }
-          100% { transform: scale(0.95); opacity: 0.7; }
-        }
-        
-        @keyframes rotate {
-          0% { transform: rotate(0deg); }
-          50% { transform: rotate(180deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-        
-        @keyframes bounce {
-          0%, 80%, 100% { 
-            transform: scale(0);
-          } 
-          40% { 
-            transform: scale(1);
-          }
-        }
-      `}</style>
     </div>
   );
 }
+
+// Hapus style tag dari dalam Splash component dan pastikan animasi sudah ada di GlobalStyles
+
 
 // -----------------------------------------------------
 // Auth (username + password)
 // -----------------------------------------------------
 function Auth({ onSigned }){
-  const [mode,setMode] = useState('login');
+  const [mhhdode,setMode] = useState('login');
   return (
     <div className="card pop" style={{padding:14}}>
       <div className="row" style={{justifyContent:'space-between'}}>
