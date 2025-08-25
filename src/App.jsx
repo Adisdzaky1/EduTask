@@ -331,6 +331,118 @@ function Splash(){
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
+      background: 'var(--bg)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background efek subtle */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '300px',
+        height: '300px',
+        background: 'radial-gradient(circle, rgba(108, 139, 255, 0.1) 0%, transparent 70%)',
+        opacity: 0.5
+      }}/>
+      
+      <div className="col" style={{alignItems: 'center', gap: '28px', position: 'relative', zIndex: 2}}>
+        {/* Loader elegan dengan animasi */}
+        <div style={{
+          position: 'relative',
+          width: '60px',
+          height: '60px'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            border: '2px solid rgba(108, 139, 255, 0.2)',
+            borderRadius: '50%',
+            animation: 'rotate 1.8s linear infinite'
+          }}/>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            border: '2px solid transparent',
+            borderTop: '2px solid var(--brand)',
+            borderRadius: '50%',
+            animation: 'rotate 1.2s ease-in-out infinite'
+          }}/>
+        </div>
+        
+        {/* Teks dengan animasi fade */}
+        <div style={{
+          color: 'var(--text)',
+          fontSize: '16px',
+          fontWeight: '500',
+          letterSpacing: '0.5px',
+          textTransform: 'uppercase'
+        }}>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite'}}>E</span>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite 0.1s'}}>d</span>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite 0.2s'}}>u</span>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite 0.3s'}}>T</span>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite 0.4s'}}>a</span>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite 0.5s'}}>s</span>
+          <span style={{opacity: 1, animation: 'fadeText 2s ease-in-out infinite 0.6s'}}>k</span>
+        </div>
+        
+        {/* Progress indicator subtle */}
+        <div style={{
+          width: '120px',
+          height: '1px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          position: 'relative'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: '30%',
+            background: 'var(--brand)',
+            animation: 'progress 2s ease-in-out infinite'
+          }}/>
+        </div>
+      </div>
+
+      {/* Tambahkan animasi ke GlobalStyles */}
+      <style>{`
+        @keyframes rotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeText {
+          0% { opacity: 0.3; }
+          50% { opacity: 1; }
+          100% { opacity: 0.3; }
+        }
+        
+        @keyframes progress {
+          0% { left: 0; width: 0%; }
+          50% { left: 30%; width: 40%; }
+          100% { left: 100%; width: 0%; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Splasdhdhdhh(){
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
       background: 'radial-gradient(1200px 600px at 50% -20%,#17203f 0%,#0b1020 60%)'
     }}>
       <div className="col" style={{alignItems: 'center', gap: '24px'}}>
