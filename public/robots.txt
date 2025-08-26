@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://https://edutask-app.vercel.app/sitemap.xml
+Sitemap: https://edutask-app.vercel.app/sitemap.xml
