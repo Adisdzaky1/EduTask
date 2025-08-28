@@ -32,7 +32,7 @@
         <meta property="og:image:height" content="512">
 
         <!-- Preload dengan atribut as yang valid -->
-        <link rel="preload" href="/manifest.json" as="manifest" />
+        <!-- <link rel="preload" href="/manifest.json" as="manifest" /> -->
         <link rel="manifest" href="/manifest.json" />
         
         <!-- Apple touch icon -->
@@ -50,18 +50,18 @@
        <script type="module" src="/src/main.jsx"></script>
         <script>
             // Cek dulu apakah browser mendukung service worker
-            if ("serviceWorker" in navigator) {
-                window.addEventListener("load", function () {
-                    // Gunakan path yang relatif terhadap root
-                    navigator.serviceWorker
-                        .register("/serviceWorker.js", { scope: "/" })
-                        .then((registration) => {
-                            console.log("SW registered: ", registration);
-                        })
-                        .catch((registrationError) => {
-                            console.log("SW registration failed: ", registrationError);
-                        });
-                });
+            
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker
+        .register("/serviceWorker.js", { scope: "/" })
+        .then((registration) => {
+          console.log("SW registered: ", registration);
+        })
+        .catch((registrationError) => {
+          console.log("SW registration failed: ", registrationError);
+        });
+    });
             }
         </script>
     </body>
