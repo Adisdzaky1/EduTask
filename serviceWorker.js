@@ -1,86 +1,91 @@
-importScripts("https://storage.googleapis.com/workbox-cdn/releases/6.2.0/workbox-sw.js");
+// serviceWorker.js
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js");
 
-workbox.setConfig({ debug: true });
+// Hanya aktifkan debug di development
+if (new URL(self.registration.scope).hostname === 'localhost') {
+  workbox.setConfig({ debug: true });
+}
 
 const {
-    routing: { registerRoute, setCatchHandler },
-    strategies: { CacheFirst, NetworkFirst, StaleWhileRevalidate },
-    cacheableResponse: { CacheableResponse, CacheableResponsePlugin },
-    expiration: { ExpirationPlugin, CacheExpiration },
-    precaching: { matchPrecache, precacheAndRoute },
+  routing: { registerRoute, setCatchHandler },
+  strategies: { CacheFirst, NetworkFirst, StaleWhileRevalidate },
+  cacheableResponse: { CacheableResponsePlugin },
+  expiration: { ExpirationPlugin },
+  precaching: { matchPrecache, precacheAndRoute },
 } = workbox;
 
-precacheAndRoute([{ url: "/offline.html", revision: null }]);
+// Precaching
+precacheAndRoute([
+  { url: "/offline.html", revision: null },
+  { url: "/icons/icon_512.png", revision: null },
+  { url: "/manifest.json", revision: null }
+]);
 
-// Cache page navigations (html) with a Network First strategy
+// Cache page navigations with Network First strategy
 registerRoute(
-    ({ request }) => request.mode === "navigate",
-    new NetworkFirst({
-        cacheName: "pages",
-        plugins: [
-            new CacheableResponsePlugin({
-                statuses: [200],
-            }),
-        ],
-    })
+  ({ request }) => request.mode === "navigate",
+  new NetworkFirst({
+    cacheName: "pages",
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({ maxEntries: 10 })
+    ],
+  })
+);
+
+// Cache static assets
+registerRoute(
+  ({ request }) =>
+    request.destination === "style" ||
+    request.destination === "script" ||
+    request.destination === "worker",
+  new StaleWhileRevalidate({
+    cacheName: "static-assets",
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 24 * 60 * 60 })
+    ],
+  })
+);
+
+// Cache images
+registerRoute(
+  ({ request }) => request.destination === "image",
+  new CacheFirst({
+    cacheName: "images",
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 })
+    ],
+  })
 );
 
 // Cache Google Fonts
 registerRoute(
-    ({ url }) =>
-        url.origin === "https://fonts.googleapis.com" ||
-        url.origin === "https://fonts.gstatic.com",
-    new StaleWhileRevalidate({
-        cacheName: "pwa-google-fonts",
-        plugins: [new ExpirationPlugin({ maxEntries: 20 })],
-    })
+  ({ url }) => url.origin === "https://fonts.googleapis.com" ||
+              url.origin === "https://fonts.gstatic.com",
+  new StaleWhileRevalidate({
+    cacheName: "google-fonts",
+    plugins: [new ExpirationPlugin({ maxEntries: 10 })]
+  })
 );
 
-// Cache Images
-registerRoute(
-    ({ request }) => request.destination === "image",
-    new CacheFirst({
-        cacheName: "pwa-images",
-        plugins: [
-            new CacheableResponsePlugin({
-                statuses: [0, 200],
-            }),
-            new ExpirationPlugin({
-                maxEntries: 60,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
-            }),
-        ],
-    })
-);
-
-// Cache CSS, JS, Manifest, and Web Worker
-registerRoute(
-    ({ request }) =>
-        request.destination === "script" ||
-        request.destination === "style" ||
-        request.destination === "manifest" ||
-        request.destination === "worker",
-    new StaleWhileRevalidate({
-        cacheName: "pwa-static-assets",
-        plugins: [
-            new CacheableResponsePlugin({
-                statuses: [0, 200],
-            }),
-            new ExpirationPlugin({
-                maxEntries: 32,
-                maxAgeSeconds: 24 * 60 * 60, // 24 hours
-            }),
-        ],
-    })
-);
-
-// Catch routing errors, like if the user is offline
+// Fallback untuk offline
 setCatchHandler(async ({ event }) => {
-    // Return the precached offline page if a document is being requested
-    if (event.request.destination === "document") {
-        return matchPrecache("/offline.html");
-    }
-
-    return Response.error();
+  if (event.request.destination === "document") {
+    return matchPrecache("/offline.html");
+  }
+  return Response.error();
 });
 
+// Event listener untuk install
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+  console.log("Service Worker installed");
+});
+
+// Event listener untuk activate
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+  console.log("Service Worker activated");
+});
