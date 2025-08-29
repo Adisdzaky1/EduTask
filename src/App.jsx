@@ -452,13 +452,43 @@ function Register({ onSigned }){
   const [username,setUsername]=useState('');
   const [password,setPassword]=useState('');
   const [role,setRole]=useState('student');
-  const [classes,setClasses]=useState([]);
-  const [classId,setClassId]=useState('');
+  const [classCode,setClassCode]=useState('');
   const [err,setErr]=useState('');
 
-  useEffect(()=>{ supabase.from('classes').select('*').order('name').then(r=>{ if(!r.error) setClasses(r.data||[]); }); },[]);
+  const submit=async(e)=>{
+    e.preventDefault();
+    setErr('');
+    try{
+      const email=`${username}@edutask.local`;
+      const { data,error }=await supabase.auth.signUp({ email, password });
+      if(error) return setErr(error.message);
+      const uid=data?.user?.id;
+      if(!uid) return setErr('Gagal membuat akun');
+      
+      // Cari kelas berdasarkan kode
+      let classId = null;
+      if(role==='student'){
+        if(!classCode) return setErr('Kode kelas wajib untuk siswa');
+        const { data: classData, error: classError } = await supabase
+          .from('classes')
+          .select('id')
+          .eq('code', classCode)
+          .single();
+        if(classError || !classData) return setErr('Kode kelas tidak valid');
+        classId = classData.id;
+      }
 
-  const submit=async(e)=>{e.preventDefault();setErr('');try{const email=`${username}@edutask.local`;const { data,error }=await supabase.auth.signUp({ email, password });if(error) return setErr(error.message);const uid=data?.user?.id;if(!uid) return setErr('Gagal membuat akun');const payload={ id:uid, username, role, class_id: role==='student'? (classId||null): null };const { error:pErr }=await supabase.from('profiles').insert(payload);if(pErr) setErr(pErr.message); else onSigned();}catch(ex){setErr(ex.message)}};
+      const payload={ 
+        id:uid, 
+        username, 
+        role, 
+        class_id: role==='student'? classId : null 
+      };
+      const { error:pErr }=await supabase.from('profiles').insert(payload);
+      if(pErr) setErr(pErr.message); 
+      else onSigned();
+    }catch(ex){setErr(ex.message)}
+  };
 
   return (
     <form onSubmit={submit} className="col" style={{marginTop:10}}>
@@ -470,14 +500,14 @@ function Register({ onSigned }){
       </div>
       {role==='student' && (
         <div className="col">
-          <div className="small muted">Pilih Kelas (wajib)</div>
-          <div className="row">
-            <select required value={classId} onChange={e=>setClassId(e.target.value)}>
-              <option value="">-- Pilih kelas --</option>
-              {classes.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <InlineCreateClass onCreated={(c)=>setClasses(v=>[...v,c])}/>
-          </div>
+          <div className="small muted">Masukkan Kode Kelas (minimal 5 karakter)</div>
+          <input 
+            required 
+            placeholder="Kode Kelas" 
+            value={classCode} 
+            onChange={e=>setClassCode(e.target.value)}
+            minLength={5}
+          />
         </div>
       )}
       {err && <div className="small" style={{color:'salmon'}}>{err}</div>}
@@ -489,16 +519,43 @@ function Register({ onSigned }){
 function InlineCreateClass({ onCreated }){
   const [open,setOpen]=useState(false);
   const [name,setName]=useState('');
-  const create=async()=>{ if(!name) return; const { data,error }=await supabase.from('classes').insert({name}).select().single(); if(!error){ onCreated(data); setName(''); setOpen(false);} else alert(error.message) };
+  const [code,setCode]=useState('');
+  
+  const create=async()=>{ 
+    if(!name) return alert('Nama kelas wajib');
+    if(!code || code.length < 5) return alert('Kode kelas minimal 5 karakter');
+    
+    const { data,error }=await supabase.from('classes')
+      .insert({name, code})
+      .select()
+      .single(); 
+      
+    if(!error){ 
+      onCreated(data); 
+      setName(''); 
+      setCode('');
+      setOpen(false);
+    } else {
+      alert(error.message);
+    }
+  };
+  
   return open? (
-    <div className="row" style={{gap:6}}>
+    <div className="col" style={{gap:6}}>
       <input placeholder="Nama kelas" value={name} onChange={e=>setName(e.target.value)} />
-      <button type="button" className="btn" onClick={create}>Simpan</button>
-      <button type="button" className="btn ghost" onClick={()=>setOpen(false)}>Batal</button>
+      <input 
+        placeholder="Kode kelas (min 5 karakter)" 
+        value={code} 
+        onChange={e=>setCode(e.target.value)}
+        minLength={5}
+      />
+      <div className="row">
+        <button type="button" className="btn" onClick={create}>Simpan</button>
+        <button type="button" className="btn ghost" onClick={()=>setOpen(false)}>Batal</button>
+      </div>
     </div>
   ) : <button type="button" className="btn ghost" onClick={()=>setOpen(true)}>Buat Kelas</button>;
 }
-
 // -----------------------------------------------------
 // Home
 // -----------------------------------------------------
@@ -1011,11 +1068,36 @@ function TeacherAdmin(){
   const [cats,setCats]=useState([]);
   const [classes,setClasses]=useState([]);
   const [newCat,setNewCat]=useState('');
+  
   useEffect(()=>{ load(); },[]);
-  async function load(){ const { data:c }= await supabase.from('categories').select('*').order('name'); const { data:cs }= await supabase.from('classes').select('*').order('name'); setCats(c||[]); setClasses(cs||[]);} 
-  const addCat=async()=>{ if(!newCat) return; const { error }= await supabase.from('categories').insert({ name:newCat }); if(error) return alert(error.message); setNewCat(''); load(); pushToast({ title:'Kategori ditambahkan', body:newCat }); };
-  const delCat=async(id)=>{ if(!confirm('Hapus kategori?')) return; await supabase.from('categories').delete().eq('id',id); load(); };
-  const delCls=async(id)=>{ if(!confirm('Hapus kelas?')) return; await supabase.from('classes').delete().eq('id',id); load(); };
+  
+  async function load(){ 
+    const { data:c }= await supabase.from('categories').select('*').order('name'); 
+    const { data:cs }= await supabase.from('classes').select('*').order('name'); 
+    setCats(c||[]); 
+    setClasses(cs||[]);
+  } 
+  
+  const addCat=async()=>{ 
+    if(!newCat) return; 
+    const { error }= await supabase.from('categories').insert({ name:newCat }); 
+    if(error) return alert(error.message); 
+    setNewCat(''); 
+    load(); 
+    pushToast({ title:'Kategori ditambahkan', body:newCat }); 
+  };
+  
+  const delCat=async(id)=>{ 
+    if(!confirm('Hapus kategori?')) return; 
+    await supabase.from('categories').delete().eq('id',id); 
+    load(); 
+  };
+  
+  const delCls=async(id)=>{ 
+    if(!confirm('Hapus kelas?')) return; 
+    await supabase.from('classes').delete().eq('id',id); 
+    load(); 
+  };
 
   return (
     <div className="grid grid-2">
@@ -1042,7 +1124,10 @@ function TeacherAdmin(){
         <div className="col" style={{marginTop:8}}>
           {classes.map(c=> (
             <div key={c.id} className="item row" style={{justifyContent:'space-between'}}>
-              <div>{c.name}</div>
+              <div>
+                <div>{c.name}</div>
+                <div className="small muted">Kode: {c.code}</div>
+              </div>
               <button className="btn ghost" onClick={()=>delCls(c.id)}>Hapus</button>
             </div>
           ))}
@@ -1052,6 +1137,7 @@ function TeacherAdmin(){
     </div>
   );
 }
+
 
 // -----------------------------------------------------
 // Helpers
