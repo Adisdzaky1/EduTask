@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <title>EduTask - Platform Manajemen Tugas Sekolah</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="EduTask adalah solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah. 100% Gratis.">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#0b1020" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="google" content="notranslate" />
+        <meta name="keywords" content="Edutask app, pengelola tugas, manajemen tugas, aplikasi pendidikan, kelas online, e-learning, guru, siswa, tugas sekolah, edutask, gratis">
+        <meta name="author" content="Adis Dzaky Rifai">
+        <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    
+        <!-- Indexing / Crawling -->
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="https://edutask-app.vercel.app/">
+        <meta name="twitter:title" content="EduTask - Platform Manajemen Tugas Sekolah Modern & Gratis">
+        <meta name="twitter:description" content="Solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah.">
+        <meta name="twitter:image" content="https://edutask-app.vercel.app/icons/icon_512.png">
+        
+        <!-- Open Graph -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://edutask-app.vercel.app/">
+        <meta property="og:title" content="EduTask - Platform Manajemen Tugas Sekolah Modern & Gratis">
+        <meta property="og:description" content="Solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah.">
+        <meta property="og:image" content="https://edutask-app.vercel.app/icons/icon_512.png">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
+
+        <!-- Preload dengan atribut as yang valid -->
+        <!-- <link rel="preload" href="/manifest.json" as="manifest" /> -->
+        <link rel="manifest" href="/manifest.json" />
+        
+        <!-- Apple touch icon -->
+        <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon_120.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon_152.png" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/icons/apple-touch-icon_167.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon_180.png" />
+        
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+
+         <!-- hreflang (jika ada versi lain, tambahkan; contoh untuk Bahasa Indonesia) -->
+  <link rel="alternate" hreflang="id" href="https://edutask-app.vercel.app/" />
+
+  <!-- Structured Data (SoftwareApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "EduTask",
+    "url": "https://edutask-app.vercel.app/",
+    "description": "EduTask adalah solusi lengkap untuk guru & siswa mengelola tugas sekolah: buat kelas, kirim tugas, pantau progres, kalender akademik, pengingat otomatis, dan laporan penilaian.",
+    "operatingSystem": "Android, iOS, Web",
+    "applicationCategory": "EducationApplication",
+    "screenshot": "https://edutask-app.vercel.app/icons/icon_512.png"
+  }
+  </script>
+    </head>
+    <body>
+       <div id="root"></div>
+       <script type="module" src="/src/main.jsx"></script>
+        <script>
+            // Cek dulu apakah browser mendukung service worker
+            
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker
+        .register("/serviceWorker.js", { scope: "/" })
+        .then((registration) => {
+          console.log("SW registered: ", registration);
+        })
+        .catch((registrationError) => {
+          console.log("SW registration failed: ", registrationError);
+        });
+    });
+            }
+        </script>
+    </body>
+</html>

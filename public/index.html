@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+ <head>
+        <title>EduTask - Platform Manajemen Tugas Sekolah</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="EduTask adalah solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah. 100% Gratis.">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#0b1020" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="google" content="notranslate" />
+        <meta name="keywords" content="EduTask, Edutask app, pengelola tugas, manajemen tugas, aplikasi pendidikan, kelas online, e-learning, guru, siswa, tugas sekolah, edutask, gratis">
+        <meta name="author" content="Adis Dzaky Rifai">
+        <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    
+        <!-- Indexing / Crawling -->
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="https://edutask-app.vercel.app/">
+        <meta name="twitter:title" content="EduTask - Platform Manajemen Tugas Sekolah Modern & Gratis">
+        <meta name="twitter:description" content="Solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah.">
+        <meta name="twitter:image" content="https://edutask-app.vercel.app/icons/icon_512.png">
+        
+        <!-- Open Graph -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://edutask-app.vercel.app/">
+        <meta property="og:title" content="EduTask - Platform Manajemen Tugas Sekolah Modern & Gratis">
+        <meta property="og:description" content="Solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah.">
+        <meta property="og:image" content="https://edutask-app.vercel.app/icons/icon_512.png">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
+
+        <!-- Preload dengan atribut as yang valid -->
+        <!-- <link rel="preload" href="/manifest.json" as="manifest" /> -->
+        <link rel="manifest" href="/manifest.json" />
+        
+        <!-- Apple touch icon -->
+        <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon_120.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon_152.png" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/icons/apple-touch-icon_167.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon_180.png" />
+        
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+
+         <!-- hreflang (jika ada versi lain, tambahkan; contoh untuk Bahasa Indonesia) -->
+  <link rel="alternate" hreflang="id" href="https://edutask-app.vercel.app/" />
+
+  <!-- Structured Data (SoftwareApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "EduTask",
+    "url": "https://edutask-app.vercel.app/",
+    "description": "EduTask adalah solusi lengkap untuk guru & siswa mengelola tugas sekolah: buat kelas, kirim tugas, pantau progres, kalender akademik, pengingat otomatis, dan laporan penilaian.",
+    "operatingSystem": "Android, iOS, Web",
+    "applicationCategory": "EducationApplication",
+    "screenshot": "https://edutask-app.vercel.app/icons/icon_512.png"
+  }
+  </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- AOS (Animate On Scroll) Library for animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F9FAFB; /* gray-50 */
+        }
+        .faq-item .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 200px; /* Adjust as needed */
+        }
+        .faq-item.open .faq-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-200 transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <a href="#" class="text-2xl font-bold text-gray-900">Edu<span class="text-indigo-600">Task</span></a>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">Kelebihan</a>
+                    <a href="#how-it-works" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">Cara Kerja</a>
+                    <a href="#faq" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">FAQ</a>
+                    <a href="/portfolio" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">Portfolio</a>
+                </nav>
+                
+                <!-- Desktop Action Button -->
+                <div class="hidden md:flex items-center">
+                    <a href="https://edutask-app.vercel.app" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg shadow-lg hover:shadow-indigo-500/50 transition-all transform hover:scale-105 duration-300">Register</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden"><button id="mobile-menu-button" class="text-gray-700 focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button></div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <nav class="flex flex-col space-y-2 p-4">
+                <a href="#features" class="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md">Kelebihan</a>
+                <a href="#how-it-works" class="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md">Cara Kerja</a>
+                <a href="#faq" class="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md">FAQ</a>
+                <a href="/portfolio" class="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md">Portfolio</a>
+                <a href="https://edutask-app.vercel.app/" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold mt-2 py-2 px-5 rounded-lg shadow-lg">Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="overflow-x-hidden">
+        <!-- Hero Section -->
+        <section class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div data-aos="fade-up">
+                    <span class="inline-block bg-indigo-100 text-indigo-700 text-sm font-semibold px-4 py-1 rounded-full mb-4">✨ 100% Gratis Selamanya</span>
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-4">Fokus Mengajar, <br class="hidden md:block">Bukan Administrasi Tugas</h1>
+                    <p class="max-w-2xl mx-auto text-lg md:text-xl text-gray-600 mb-8">EduTask adalah platform modern yang menyederhanakan cara guru memberikan dan siswa mengerjakan tugas. Terorganisir, efisien, dan tanpa biaya.</p>
+                    <a href="https://edutask-app.vercel.app/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-xl transition-transform transform hover:scale-105 duration-300">Daftar Akun Gratis</a>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="200" class="mt-16"><img src="https://edutask-app.vercel.app/Screenshot_2025-08-31-06-30-37-12.jpg" alt="Dasbor EduTask" class="rounded-2xl shadow-2xl mx-auto ring-1 ring-gray-200"></div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Sangat Mudah Digunakan</h2>
+                    <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">Hanya dalam 3 langkah, kelas Anda siap untuk berjalan lebih efisien.</p>
+                </div>
+                <div class="relative">
+                    <!-- Connector line for desktop -->
+                    <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+                        <!-- Step 1 -->
+                        <div class="text-center" data-aos="fade-up">
+                            <div class="relative inline-block">
+                                <div class="w-20 h-20 mx-auto bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-2xl font-bold ring-8 ring-gray-50">1</div>
+                            </div>
+                            <h3 class="text-xl font-bold mt-6 mb-2">Buat Kelas & Kategori</h3>
+                            <p class="text-gray-600">Guru membuat kelas virtual untuk setiap mata pelajaran dan mengatur kategori tugas (PR, Ujian, Proyek) agar terorganisir.</p>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="150">
+                            <div class="relative inline-block">
+                                <div class="w-20 h-20 mx-auto bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-2xl font-bold ring-8 ring-gray-50">2</div>
+                            </div>
+                            <h3 class="text-xl font-bold mt-6 mb-2">Beri & Kirim Tugas</h3>
+                            <p class="text-gray-600">Guru memposting tugas baru dengan instruksi dan tenggat waktu. Siswa menerima notifikasi dan mengirimkan hasil tugas secara digital.</p>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                             <div class="relative inline-block">
+                                <div class="w-20 h-20 mx-auto bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-2xl font-bold ring-8 ring-gray-50">3</div>
+                            </div>
+                            <h3 class="text-xl font-bold mt-6 mb-2">Pantau & Beri Nilai</h3>
+                            <p class="text-gray-600">Guru dapat dengan mudah melihat siapa saja yang sudah dan belum mengumpulkan, lalu memberikan nilai dan feedback langsung di platform.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Kelebihan Utama EduTask</h2>
+                    <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">Dirancang khusus untuk memecahkan masalah nyata di lingkungan sekolah.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 p-8 rounded-2xl" data-aos="fade-up"><h3 class="text-xl font-bold text-gray-900 mb-2">Manajemen Kelas Terpusat</h3><p class="text-gray-600">Buat kelas untuk setiap mata pelajaran, undang siswa dengan kode unik, dan lihat semua tugas dalam satu dasbor yang rapi.</p></div>
+                    <div class="bg-gray-50 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="100"><h3 class="text-xl font-bold text-gray-900 mb-2">Pengumpulan Tugas Digital</h3><p class="text-gray-600">Siswa dapat mengunggah file tugas (dokumen, gambar, PDF) langsung dari HP atau komputer. Guru menerima notifikasi instan.</p></div>
+                    <div class="bg-gray-50 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="200"><h3 class="text-xl font-bold text-gray-900 mb-2">Pengingat & Notifikasi Otomatis</h3><p class="text-gray-600">Sistem akan mengirimkan pengingat otomatis kepada siswa saat mendekati tenggat waktu, mengurangi keterlambatan.</p></div>
+                    <div class="bg-gray-50 p-8 rounded-2xl" data-aos="fade-up"><h3 class="text-xl font-bold text-gray-900 mb-2">Akun Terpisah Guru & Siswa</h3><p class="text-gray-600">Setiap peran memiliki dasbor yang dioptimalkan untuk kebutuhannya, membuat navigasi menjadi intuitif dan efisien.</p></div>
+                    <div class="bg-gray-50 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="100"><h3 class="text-xl font-bold text-gray-900 mb-2">Kategori Tugas Fleksibel</h3><p class="text-gray-600">Kelompokkan tugas berdasarkan mata pelajaran atau jenis (PR, Ujian, Proyek) agar semuanya lebih terstruktur.</p></div>
+                    <div class="bg-gray-50 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="200"><h3 class="text-xl font-bold text-gray-900 mb-2">Akses di Mana Saja</h3><p class="text-gray-600">Sebagai aplikasi web, EduTask dapat diakses dari perangkat apa pun (HP, tablet, laptop) tanpa perlu instalasi.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Pertanyaan yang Sering Diajukan</h2>
+                    <p class="text-lg text-gray-600 mt-2">Menemukan jawaban yang Anda butuhkan.</p>
+                </div>
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <!-- FAQ Item 1 -->
+                    <div class="faq-item bg-white rounded-lg shadow-sm border border-gray-200" data-aos="fade-up">
+                        <button class="faq-question w-full flex justify-between items-center text-left p-5 font-semibold text-gray-800"><span>Apakah EduTask benar-benar gratis?</span><svg class="faq-icon w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="faq-answer px-5 pb-5 text-gray-600"><p>Ya, 100% gratis. Misi kami adalah untuk mempermudah akses pendidikan berkualitas dengan menyediakan alat bantu yang efisien tanpa biaya apa pun.</p></div>
+                    </div>
+                    <!-- FAQ Item 2 -->
+                    <div class="faq-item bg-white rounded-lg shadow-sm border border-gray-200" data-aos="fade-up" data-aos-delay="100">
+                        <button class="faq-question w-full flex justify-between items-center text-left p-5 font-semibold text-gray-800"><span>Bagaimana cara mendaftarkan sekolah saya?</span><svg class="faq-icon w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="faq-answer px-5 pb-5 text-gray-600"><p>Anda tidak perlu mendaftarkan sekolah. Cukup guru yang membuat akun, lalu membuat kelas dan mengundang siswanya untuk bergabung. Prosesnya cepat dan mudah.</p></div>
+                    </div>
+                    <!-- FAQ Item 3 -->
+                    <div class="faq-item bg-white rounded-lg shadow-sm border border-gray-200" data-aos="fade-up" data-aos-delay="200">
+                        <button class="faq-question w-full flex justify-between items-center text-left p-5 font-semibold text-gray-800"><span>Apakah data saya aman di EduTask?</span><svg class="faq-icon w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="faq-answer px-5 pb-5 text-gray-600"><p>Keamanan data adalah prioritas utama kami. Kami menggunakan praktik keamanan standar industri untuk melindungi semua data pengguna. Untuk detail lebih lanjut, silakan baca Kebijakan Privasi kami.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24">
+                <div class="bg-indigo-600 rounded-2xl p-8 md:p-12 text-center" data-aos="zoom-in">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Siap Mengubah Cara Anda Mengelola Tugas?</h2>
+                    <p class="text-lg text-indigo-200 mt-4 max-w-2xl mx-auto">Buat akun gratis Anda sekarang dan rasakan kemudahannya. Hanya butuh kurang dari satu menit untuk memulai.</p>
+                    <a href="/register" class="mt-8 inline-block bg-white hover:bg-gray-100 text-indigo-600 font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">Mulai Gratis Sekarang</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-gray-900 text-gray-400">
+        <div class="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-1">
+                    <a href="#" class="text-2xl font-bold text-white">Edu<span class="text-indigo-400">Task</span></a>
+                    <p class="mt-4 text-sm">Platform modern untuk menyederhanakan manajemen tugas sekolah, dirancang untuk guru dan siswa.</p>
+                </div>
+                <!-- Navigation -->
+                <div>
+                    <h3 class="font-semibold text-white tracking-wider uppercase">Navigasi</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li><a href="#features" class="hover:text-indigo-400">Kelebihan</a></li>
+                        <li><a href="#how-it-works" class="hover:text-indigo-400">Cara Kerja</a></li>
+                        <li><a href="#faq" class="hover:text-indigo-400">FAQ</a></li>
+                    </ul>
+                </div>
+                <!-- Legal -->
+                <div>
+                    <h3 class="font-semibold text-white tracking-wider uppercase">Legal</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li><a href="/privacy-policy" class="hover:text-indigo-400">Kebijakan Privasi</a></li>
+                        <li><a href="/terms-of-service" class="hover:text-indigo-400">Syarat & Ketentuan</a></li>
+                    </ul>
+                </div>
+                <!-- Connect -->
+                <div>
+                    <h3 class="font-semibold text-white tracking-wider uppercase">Terhubung</h3>
+                    <div class="flex mt-4 space-x-4">
+                        <a href="https://github.com/Adisdzaky1" target="_blank" rel="noopener noreferrer" class="hover:text-white"><span class="sr-only">GitHub</span><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-gray-700 pt-8 text-center text-sm">
+                <p>&copy; 2025 EduTask. Dibuat dengan ❤️ oleh <a href="https://github.com/your-username" class="font-semibold text-indigo-400 hover:text-indigo-300">AdisDzakyR</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS (Animate on Scroll)
+        AOS.init({
+            duration: 800,
+            once: true,
+        });
+
+        // Mobile Menu Logic
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // FAQ Accordion Logic
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isOpen = item.classList.contains('open');
+                // Close all other items
+                faqItems.forEach(i => i.classList.remove('open'));
+                // If it wasn't open, open it
+                if (!isOpen) {
+                    item.classList.add('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
