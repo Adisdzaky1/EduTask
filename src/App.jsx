@@ -612,15 +612,39 @@ function TasksPage({ profile, onTaskSelect }){
   const [classes,setClasses]=useState([]);
 
   useEffect(()=>{ load(); const sub = supabase.channel('realtime:tasks').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>load()).subscribe(); return ()=>supabase.removeChannel(sub); },[]);
+  
   async function load(){
-  const { data:t } = await supabase.from('tasks')
-  .select('*, categories:category_id(name), classes:class_id(name)') // Ubah dari class ke classes
-  .order('created_at',{ascending:false});
-    // const { data:t } = await supabase.from('tasks').select('*, categories:category_id(name), class:class_id(name)').order('created_at',{ascending:false});
+    const { data:t } = await supabase.from('tasks')
+      .select('*, categories:category_id(name), classes:class_id(name)')
+      .order('created_at',{ascending:false});
     const { data: c }= await supabase.from('categories').select('*').order('name');
     const { data: cs }= await supabase.from('classes').select('*').order('name');
     setTasks(t||[]); setCats(c||[]); setClasses(cs||[]);
   }
+
+  const deleteTask = async (taskId) => {
+    try {
+      // Hapus submissions terkait terlebih dahulu
+      await supabase.from('submissions').delete().eq('task_id', taskId);
+      
+      // Hapus messages terkait
+      await supabase.from('messages').delete().eq('task_id', taskId);
+      
+      // Hapus task
+      const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+      
+      if (error) {
+        console.error('Error deleting task:', error);
+        pushToast({ title: 'Gagal menghapus tugas', body: error.message });
+      } else {
+        pushToast({ title: 'Berhasil', body: 'Tugas dihapus' });
+        load(); // Reload tasks
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      pushToast({ title: 'Error', body: 'Gagal menghapus tugas' });
+    }
+  };
 
   const shown = useMemo(()=> tasks.filter(x=>{
     if (profile.role==='student' && profile.class_id && x.class_id!==profile.class_id) return false;
@@ -651,7 +675,15 @@ function TasksPage({ profile, onTaskSelect }){
 
       <div className="col">
         {shown.map(t=> 
-          t.id ? <TaskCard key={t.id} task={t} onOpen={()=>onTaskSelect(t.id)} /> : null
+          t.id ? (
+            <TaskCard 
+              key={t.id} 
+              task={t} 
+              profile={profile}
+              onOpen={()=>onTaskSelect(t.id)} 
+              onDelete={deleteTask}
+            />
+          ) : null
         )}
         {shown.length===0 && <div className="muted small">Tidak ada tugas.</div>}
       </div>
@@ -659,19 +691,35 @@ function TasksPage({ profile, onTaskSelect }){
   );
 }
 
-function TaskCard({ task, onOpen }){
-  // Hapus useEffect yang mengambil thumbnail untuk menghilangkan tampilan gambar/video di list task
+function TaskCard({ task, onOpen, profile, onDelete }){
   return (
-    <div className="item card slideUp" onClick={onOpen} style={{cursor:'pointer'}}>
+    <div className="item card slideUp" style={{cursor:'pointer', position: 'relative'}}>
       <div className="row" style={{justifyContent:'space-between'}}>
-        <div>
+        <div style={{flex: 1}} onClick={onOpen}>
           <div className="title">{task.title}</div>
           <div className="small muted">{task.description?.slice(0,120)}</div>
+          {profile.role === 'teacher' && task.classes && (
+            <div className="small muted" style={{marginTop: 4}}>
+              Kelas: {task.classes.name}
+            </div>
+          )}
         </div>
         <div className="col" style={{alignItems:'flex-end'}}>
           <span className="badge">{task.categories?.name || 'Umum'}</span>
           <span className="badge">Prioritas: {task.priority}</span>
           <span className="badge">Due: {task.due_at? dayjs(task.due_at).format('DD MMM HH:mm') : '-'}</span>
+          {profile.role === 'teacher' && (
+            <button 
+              className="btn ghost" 
+              style={{marginTop: 8, padding: '4px 8px', fontSize: '12px'}}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm('Hapus tugas ini?')) onDelete(task.id);
+              }}
+            >
+              Hapus
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -681,12 +729,40 @@ function TaskCard({ task, onOpen }){
 function MediaThumb({ file }){
   const url = getPublicUrl(file?.path);
   if (!url) return null;
+  
   const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(file.name||'');
-  return isVideo ? (
-    <video className="thumb" src={url} muted playsInline />
-  ) : (
-    <img className="thumb" src={url} alt={file.name} />
-  );
+  const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(file.name||'');
+  
+  if (isVideo) {
+    return (
+      <video className="thumb" src={url} muted playsInline />
+    );
+  } else if (isImage) {
+    return (
+      <img className="thumb" src={url} alt={file.name} />
+    );
+  } else {
+    // Untuk file non-image/video, tampilkan ikon download
+    return (
+      <a href={url} download={file.name} className="thumb" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,255,255,0.05)',
+        textDecoration: 'none',
+        color: 'var(--text)'
+      }}>
+        <div style={{textAlign: 'center', padding: 8}}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{marginBottom: 4}}>
+            <path d="M12 16L12 4M12 16L8 12M12 16L16 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <div className="small" style={{wordBreak: 'break-word'}}>{file.name}</div>
+          <div className="small muted">{Math.round(file.size / 1024)} KB</div>
+        </div>
+      </a>
+    );
+  }
 }
 
 function CreateTaskButton({ classes, cats, onCreated }){
