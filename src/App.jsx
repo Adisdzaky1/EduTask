@@ -726,7 +726,7 @@ function TaskCard({ task, onOpen, profile, onDelete }){
   );
 }
 
-function MediaThumb({ file }){
+function MediaThumb({ file, showDownload = true }) {
   const url = getPublicUrl(file?.path);
   if (!url) return null;
   
@@ -735,14 +735,42 @@ function MediaThumb({ file }){
   
   if (isVideo) {
     return (
-      <video className="thumb" src={url} muted playsInline />
+      <div style={{position: 'relative'}}>
+        <video className="thumb" src={url} muted playsInline />
+        {showDownload && (
+          <a href={url} download={file.name} className="btn" style={{
+            position: 'absolute',
+            bottom: 8,
+            right: 8,
+            padding: '4px 8px',
+            fontSize: '12px',
+            background: 'rgba(0,0,0,0.7)'
+          }}>
+            Download
+          </a>
+        )}
+      </div>
     );
   } else if (isImage) {
     return (
-      <img className="thumb" src={url} alt={file.name} />
+      <div style={{position: 'relative'}}>
+        <img className="thumb" src={url} alt={file.name} />
+        {showDownload && (
+          <a href={url} download={file.name} className="btn" style={{
+            position: 'absolute',
+            bottom: 8,
+            right: 8,
+            padding: '4px 8px',
+            fontSize: '12px',
+            background: 'rgba(0,0,0,0.7)'
+          }}>
+            Download
+          </a>
+        )}
+      </div>
     );
   } else {
-    // Untuk file non-image/video, tampilkan ikon download
+    // Untuk file non-image/video
     return (
       <a href={url} download={file.name} className="thumb" style={{
         display: 'flex',
@@ -837,23 +865,43 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }){
   const [msg, setMsg] = useState('');
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
-const loadSubs = useCallback(async () => {
-  if (!taskId) return;
+  const [taskFiles, setTaskFiles] = useState([]); // File dari guru
+
+  const loadSubs = useCallback(async () => {
+    if (!taskId) return;
+    
+    let query = supabase
+      .from('submissions')
+      .select(`*, profiles:student_id(username)`)
+      .eq('task_id', taskId);
+
+    // Jika user adalah siswa, hanya tampilkan submission miliknya sendiri
+    if (profile.role === 'student') {
+      query = query.eq('student_id', profile.id);
+    }
+
+    const { data } = await query.order('submitted_at', { ascending: false });
+    
+    // Pisahkan file tugas dari guru dan submission siswa
+    const teacherFiles = [];
+    const studentSubmissions = [];
+    
+    (data || []).forEach(item => {
+      if (item.student_id === null) {
+        // Ini adalah file dari guru
+        if (Array.isArray(item.files)) {
+          teacherFiles.push(...item.files);
+        }
+      } else {
+        // Ini adalah submission siswa
+        studentSubmissions.push(item);
+      }
+    });
+    
+    setTaskFiles(teacherFiles);
+    setSubs(studentSubmissions);
+  }, [taskId, profile.id, profile.role]);
   
-  let query = supabase
-    .from('submissions')
-    .select(`*, profiles:student_id(username)`)
-    .eq('task_id', taskId);
-
-  // Jika user adalah siswa, hanya tampilkan submission miliknya sendiri
-  if (profile.role === 'student') {
-    query = query.eq('student_id', profile.id);
-  }
-
-  const { data } = await query.order('submitted_at', { ascending: false });
-  setSubs(data || []);
-}, [taskId, profile.id, profile.role]);
-
  const messagesContainerRef = useRef(null); // Ref untuk container pesan
 const messagesEndRef = useRef(null);
   // Fungsi untuk scroll otomatis ke pesan terbaru di dalam container
@@ -966,105 +1014,125 @@ const messagesEndRef = useRef(null);
 
   const gallery = (subs?.[0]?.files || []).slice(0, 4);
 
-  return (
+return (
     <div className="col">
       <div className="card pop" style={{padding:12}}>
         <div className="row" style={{justifyContent:'space-between', alignItems: 'center'}}>
           <button className="btn ghost" onClick={onBack}>&larr; Kembali</button>
-          <div className="title">{task.title}</div>
+          <div className="title">{task?.title || 'Memuat...'}</div>
           <div style={{width: 80}}></div>
         </div>
 
-        <div className="small muted" style={{marginTop: 8}}>
-          Due: {task.due_at ? dayjs(task.due_at).format('DD MMM YYYY HH:mm') : '-'} • 
-          Prioritas: {task.priority} • 
-          Kelas: {task.class?.name}
-        </div>
+        {task && (
+          <>
+            <div className="small muted" style={{marginTop: 8}}>
+              Due: {task.due_at ? dayjs(task.due_at).format('DD MMM YYYY HH:mm') : '-'} • 
+              Prioritas: {task.priority} • 
+              Kelas: {task.class?.name}
+            </div>
 
-        {gallery.length > 0 && (
-          <div className="thumbs" style={{marginTop:10}}>
-            {gallery.map((f,i) => 
-              f?.path ? <MediaThumb key={i} file={f} /> : null
-            )}
-          </div>
-        )}
-
-        <div className="grid grid-2" style={{marginTop:12}}>
-          <div className="card" style={{padding:12}}>
-            <div className="title">Diskusi</div>
-            <div ref={messagesContainerRef} style={{maxHeight:280,overflow:'auto',marginTop:8}}>
-              {messages.map(m => (
-              <div key={m.id} className="item" style={{marginBottom:8}}>
-              
-                <div className="small muted">
-                    {m.profiles?.username || 'Unknown'}
-                    {m.profiles?.role === 'teacher' && (
-                      <span className="badge" style={{
-                        marginLeft: 8, 
-                        background: 'rgba(108, 139, 255, 0.12)', 
-                        borderColor: 'rgba(108, 139, 255, 0.25)',
-                        color: '#6c8bff'
-                      }}>
-                        Guruu •
-                      </span>
-                    )}
-                    • {dayjs(m.created_at).format('DD MMM HH:mm')}
-                  </div>
-                  <div>{m.text}</div>
+            {/* Tampilkan file dari guru */}
+            {taskFiles.length > 0 && (
+              <div className="card" style={{padding:12, marginTop:12}}>
+                <div className="title">File Tugas dari Guru</div>
+                <div className="thumbs" style={{marginTop:10}}>
+                  {taskFiles.map((f,i) => 
+                    f?.path ? <MediaThumb key={i} file={f} showDownload={true} /> : null
+                  )}
                 </div>
-              ))}
-            </div>
-            <div className="row" style={{marginTop:8}}>
-              <input placeholder="Tulis pesan..." value={msg} onChange={e=>setMsg(e.target.value)} />
-              <button className="btn" onClick={send}>Kirim</button>
-            </div>
-          </div>
+              </div>
+            )}
 
-          <div className="card" style={{padding:12}}>
-            <div className="title">Kirim Tugas</div>
-            <textarea placeholder="Catatan (opsional)" value={text} onChange={e=>setText(e.target.value)} />
-            <input type="file" multiple onChange={pick} />
-            <div className="row" style={{justifyContent:'flex-end',marginTop:8}}>
-              <button className="btn" onClick={submit} disabled={!task}>Kirim</button>
-            </div>
-            
-            <div className="col" style={{marginTop:10}}>
-              <div className="title" style={{fontSize:14}}>Pengumpulan</div>
-               {subs.length === 0 && profile.role === 'student' && (
-  <div className="muted small">Belum ada pengumpulan tugas yang dapat dilihat.</div>
-)}
-              {subs.map(s => (
-             
-                <div key={s.id} className="item">
-                  <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
-                  {s.text && <div style={{marginTop:6}}>{s.text}</div>}
-                  {Array.isArray(s.files) && s.files.length > 0 && (
-                    <div className="thumbs" style={{marginTop:8}}>
-                      {s.files.map((f,i) => 
-                        f?.path ? <MediaThumb key={i} file={f} /> : null
+            <div className="grid grid-2" style={{marginTop:12}}>
+              <div className="card" style={{padding:12}}>
+                <div className="title">Diskusi</div>
+                <div ref={messagesContainerRef} style={{maxHeight:280,overflow:'auto',marginTop:8}}>
+                  {messages.map(m => (
+                  <div key={m.id} className="item" style={{marginBottom:8}}>
+                  
+                    <div className="small muted">
+                        {m.profiles?.username || 'Unknown'}
+                        {m.profiles?.role === 'teacher' && (
+                          <span className="badge" style={{
+                            marginLeft: 8, 
+                            background: 'rgba(108, 139, 255, 0.12)', 
+                            borderColor: 'rgba(108, 139, 255, 0.25)',
+                            color: '#6c8bff'
+                          }}>
+                            Guru •
+                          </span>
+                        )}
+                        • {dayjs(m.created_at).format('DD MMM HH:mm')}
+                      </div>
+                      <div>{m.text}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="row" style={{marginTop:8}}>
+                  <input placeholder="Tulis pesan..." value={msg} onChange={e=>setMsg(e.target.value)} />
+                  <button className="btn" onClick={send}>Kirim</button>
+                </div>
+              </div>
+
+              <div className="card" style={{padding:12}}>
+                {profile.role === 'student' ? (
+                  <>
+                    <div className="title">Kirim Tugas</div>
+                    <textarea placeholder="Catatan (opsional)" value={text} onChange={e=>setText(e.target.value)} />
+                    <input type="file" multiple onChange={pick} />
+                    <div className="row" style={{justifyContent:'flex-end',marginTop:8}}>
+                      <button className="btn" onClick={submit} disabled={!task}>Kirim</button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="title">Pengumpulan Siswa</div>
+                )}
+                
+                <div className="col" style={{marginTop:10}}>
+                  {subs.length === 0 && (
+                    <div className="muted small">Belum ada pengumpulan.</div>
+                  )}
+                  {subs.map(s => (
+                    <div key={s.id} className="item">
+                      <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
+                      {s.text && <div style={{marginTop:6}}>{s.text}</div>}
+                      {Array.isArray(s.files) && s.files.length > 0 && (
+                        <div className="thumbs" style={{marginTop:8}}>
+                          {s.files.map((f,i) => 
+                            f?.path ? <MediaThumb key={i} file={f} showDownload={true} /> : null
+                          )}
+                        </div>
+                      )}
+                      {profile.role === 'teacher' && (
+                        <div className="row" style={{marginTop:8,justifyContent:'space-between'}}>
+                          <div className="small">Nilai: <strong>{s.grade ?? '-'}</strong></div>
+                          <input 
+                            type="number" 
+                            className="small" 
+                            placeholder="Nilai" 
+                            onBlur={e => grade(s.id, parseFloat(e.target.value))} 
+                            style={{width: '80px'}}
+                          />
+                        </div>
                       )}
                     </div>
-                  )}
-                  <div className="row" style={{marginTop:8,justifyContent:'space-between'}}>
-                    <div className="small">Nilai: <strong>{s.grade ?? '-'}</strong></div>
-                    {profile.role === 'teacher' && (
-                      <input type="number" className="small" placeholder="Nilai" onBlur={e => grade(s.id, parseFloat(e.target.value))} />
-                    )}
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="item" style={{marginTop:10}}>
-          <div className="title">Pengingat & Notifikasi</div>
-          <div className="small muted">Akan muncul notifikasi popup jika tugas lewat 12 jam dan belum dikumpulan (hanya jika waktu lokal &lt; 21:00 WIB).</div>
-        </div>
+            <div className="item" style={{marginTop:10}}>
+              <div className="title">Pengingat & Notifikasi</div>
+              <div className="small muted">Akan muncul notifikasi popup jika tugas lewat 12 jam dan belum dikumpulan (hanya jika waktu lokal &lt; 21:00 WIB).</div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
+
+
 
 // -----------------------------------------------------
 // Notifications Page + Popup toasts
