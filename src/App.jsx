@@ -858,6 +858,7 @@ function CreateTaskButton({ classes, cats, onCreated }){
 // -----------------------------------------------------
 // Task Detail Page (New Component)
 // -----------------------------------------------------
+/*
 function TaskDetailPage({ taskId, profile, dayjs, onBack }){
   const [task, setTask] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -953,8 +954,115 @@ const messagesEndRef = useRef(null);
     supabase.removeChannel(ch1);
     supabase.removeChannel(ch2);
   };
-  }, [taskId, loadSubs]);
+  }, [taskId, loadSubs]);*/
+function TaskDetailPage({ taskId, profile, dayjs, onBack }){
+  const [task, setTask] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [subs, setSubs] = useState([]);
+  const [msg, setMsg] = useState('');
+  const [text, setText] = useState('');
+  const [files, setFiles] = useState([]);
+  const [taskFiles, setTaskFiles] = useState([]); // File dari guru
 
+  const loadSubs = useCallback(async () => {
+    if (!taskId) return;
+    
+    let query = supabase
+      .from('submissions')
+      .select(`*, profiles:student_id(username)`)
+      .eq('task_id', taskId);
+
+    // Untuk semua role, ambil semua submission termasuk yang dari guru (student_id null)
+    const { data } = await query.order('submitted_at', { ascending: false });
+    
+    // Pisahkan file tugas dari guru dan submission siswa
+    const teacherFiles = [];
+    const studentSubmissions = [];
+    
+    (data || []).forEach(item => {
+      if (item.student_id === null) {
+        // Ini adalah file dari guru
+        if (Array.isArray(item.files)) {
+          teacherFiles.push(...item.files);
+        }
+      } else {
+        // Ini adalah submission siswa
+        // Untuk siswa, hanya tampilkan submission milik sendiri
+        if (profile.role === 'student' && item.student_id !== profile.id) {
+          return; // Skip submission siswa lain
+        }
+        studentSubmissions.push(item);
+      }
+    });
+    
+    setTaskFiles(teacherFiles);
+    setSubs(studentSubmissions);
+  }, [taskId, profile.id, profile.role]);
+
+  // Load task details
+  useEffect(() => {
+    if (!taskId) return;
+    
+    const loadTask = async () => {
+      const { data } = await supabase.from('tasks')
+        .select('*, categories:category_id(name), classes:class_id(name)')
+        .eq('id', taskId)
+        .single();
+      setTask(data);
+    };
+    
+    loadTask();
+  }, [taskId]);
+
+  // Load messages
+  useEffect(() => {
+    if (!taskId) return;
+    
+    const loadMessages = async () => {
+      const { data } = await supabase.from('messages')
+        .select('*, profiles:sender_id(username, role)')
+        .eq('task_id', taskId)
+        .order('created_at');
+      setMessages(data || []);
+    };
+    
+    loadMessages();
+  }, [taskId]);
+
+  // Realtime listeners
+  useEffect(() => {
+    if (!taskId) return;
+    
+    const ch1 = supabase.channel('messages:'+taskId)
+      .on('postgres_changes', {
+        event: '*', 
+        schema: 'public', 
+        table: 'messages', 
+        filter: `task_id=eq.${taskId}`
+      }, () => {
+        // Reload messages
+        supabase.from('messages')
+          .select('*, profiles:sender_id(username, role)')
+          .eq('task_id', taskId)
+          .order('created_at')
+          .then(({ data }) => setMessages(data || []));
+      })
+      .subscribe();
+  
+    const ch2 = supabase.channel('subs:'+taskId)
+      .on('postgres_changes', {
+        event: '*', 
+        schema: 'public', 
+        table: 'submissions', 
+        filter: `task_id=eq.${taskId}`
+      }, loadSubs)
+      .subscribe();
+  
+    return () => {
+      supabase.removeChannel(ch1);
+      supabase.removeChannel(ch2);
+    };
+  }, [taskId, loadSubs]);
 
   const send = async () => {
     if (!msg || !taskId) return;
@@ -1014,7 +1122,7 @@ const messagesEndRef = useRef(null);
 
   const gallery = (subs?.[0]?.files || []).slice(0, 4);
 
-return (
+    return (
     <div className="col">
       <div className="card pop" style={{padding:12}}>
         <div className="row" style={{justifyContent:'space-between', alignItems: 'center'}}>
@@ -1031,7 +1139,7 @@ return (
               Kelas: {task.class?.name}
             </div>
 
-            {/* Tampilkan file dari guru */}
+            {/* Tampilkan file dari guru - TERBUKA UNTUK SEMUA ROLE */}
             {taskFiles.length > 0 && (
               <div className="card" style={{padding:12, marginTop:12}}>
                 <div className="title">File Tugas dari Guru</div>
@@ -1094,7 +1202,7 @@ return (
                   )}
                   {subs.map(s => (
                     <div key={s.id} className="item">
-                      <div className="small muted">{s.profiles?.username || (s.student_id ? 'Unknown' : 'oleh guru')} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
+                      <div className="small muted">{s.profiles?.username || 'Unknown'} • {dayjs(s.submitted_at).format('DD MMM HH:mm')}</div>
                       {s.text && <div style={{marginTop:6}}>{s.text}</div>}
                       {Array.isArray(s.files) && s.files.length > 0 && (
                         <div className="thumbs" style={{marginTop:8}}>
@@ -1130,6 +1238,8 @@ return (
       </div>
     </div>
   );
+
+
 }
 
 
