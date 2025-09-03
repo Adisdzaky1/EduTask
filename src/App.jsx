@@ -1058,11 +1058,13 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }) {
           <div style={{width: 80}}></div>
         </div>
 
-        <div className="small muted" style={{marginTop: 8}}>
-          Due: {task.due_at ? dayjs(task.due_at).format('DD MMM YYYY HH:mm') : '-'} • 
-          Prioritas: {task.priority} • 
-          Kelas: {task.class?.name}
-        </div>
+         {task && (
+          <div className="small muted" style={{marginTop: 8}}>
+            Due: {task.due_at ? dayjs(task.due_at).format('DD MMM YYYY HH:mm') : '-'} • 
+            Prioritas: {task.priority} • 
+            Kelas: {task.classes?.name || task.class?.name || '-'}
+          </div>
+        )}
 
         {/* Tampilkan file dari guru - TERBUKA UNTUK SEMUA ROLE */}
         {taskFiles.length > 0 && (
