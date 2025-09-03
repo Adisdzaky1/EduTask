@@ -833,7 +833,7 @@ function CreateTaskButton({ classes, cats, onCreated }){
         <div className="row">
           <select value={cat} onChange={e=>setCat(e.target.value)}>
             <option value="">Kategori</option>
-            {cats.map(c=> <option key={c.id} value={c.id}>{c.name}</optiongr>)}
+            {cats.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <select value={prio} onChange={e=>setPrio(e.target.value)}>
             <option value="high">High</option>
