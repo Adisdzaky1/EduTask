@@ -833,7 +833,7 @@ function CreateTaskButton({ classes, cats, onCreated }){
         <div className="row">
           <select value={cat} onChange={e=>setCat(e.target.value)}>
             <option value="">Kategori</option>
-            {cats.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
+            {cats.map(c=> <option key={c.id} value={c.id}>{c.name}</optiongr>)}
           </select>
           <select value={prio} onChange={e=>setPrio(e.target.value)}>
             <option value="high">High</option>
@@ -1026,8 +1026,16 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }) {
   };
 
   const grade = async (id, val) => {
-    await supabase.from('submissions').update({ grade: val }).eq('id', id);
-    pushToast({ title: 'Nilai diperbarui', body: String(val) });
+    // Validasi nilai maksimal 100
+    const numericValue = parseFloat(val);
+    if (isNaN(numericValue) || numericValue < 0) {
+      pushToast({ title: 'Error', body: 'Nilai harus angka positif' });
+      return;
+    }
+    
+    const finalValue = Math.min(numericValue, 100); // Maksimal 100
+    await supabase.from('submissions').update({ grade: finalValue }).eq('id', id);
+    pushToast({ title: 'Nilai diperbarui', body: String(finalValue) });
   };
 
   if (!task) {
@@ -1107,6 +1115,19 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }) {
                 <div className="row" style={{justifyContent:'flex-end',marginTop:8}}>
                   <button className="btn" onClick={submit} disabled={!task}>Kirim</button>
                 </div>
+                
+                {/* Tampilkan nilai untuk siswa */}
+                {subs.length > 0 && subs[0].grade !== null && (
+                  <div className="item" style={{marginTop:12, background: 'rgba(108, 139, 255, 0.1)', border: '1px solid rgba(108, 139, 255, 0.2)'}}>
+                    <div className="title" style={{color: '#6c8bff'}}>Nilai Anda</div>
+                    <div style={{fontSize: '24px', fontWeight: 'bold', textAlign: 'center'}}>
+                      {subs[0].grade}
+                    </div>
+                    <div className="small muted" style={{textAlign: 'center'}}>
+                      Nilai maksimal: 100
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div className="title">Pengumpulan Siswa</div>
@@ -1127,18 +1148,28 @@ function TaskDetailPage({ taskId, profile, dayjs, onBack }) {
                       )}
                     </div>
                   )}
-                  {profile.role === 'teacher' && (
-                    <div className="row" style={{marginTop:8,justifyContent:'space-between'}}>
-                      <div className="small">Nilai: <strong>{s.grade ?? '-'}</strong></div>
-                      <input 
-                        type="number" 
-                        className="small" 
-                        placeholder="Nilai" 
-                        onBlur={e => grade(s.id, parseFloat(e.target.value))} 
-                        style={{width: '80px'}}
-                      />
+                  
+                  {/* Tampilkan nilai untuk semua role */}
+                  <div className="row" style={{marginTop:8,justifyContent:'space-between', alignItems: 'center'}}>
+                    <div className="small">
+                      Nilai: <strong>{s.grade !== null ? s.grade : '-'}</strong>
                     </div>
-                  )}
+                    
+                    {profile.role === 'teacher' && (
+                      <div className="row" style={{alignItems: 'center', gap: '8px'}}>
+                        <input 
+                          type="number" 
+                          className="small" 
+                          placeholder="Nilai" 
+                          min="0"
+                          max="100"
+                          onBlur={e => grade(s.id, parseFloat(e.target.value))} 
+                          style={{width: '80px'}}
+                        />
+                        <span className="small muted">/100</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
