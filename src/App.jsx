@@ -726,6 +726,7 @@ function TaskCard({ task, onOpen, profile, onDelete }){
   );
 }
 
+
 function MediaThumb({ file, showDownload = true }) {
   const url = getPublicUrl(file?.path);
   if (!url) return null;
@@ -770,23 +771,45 @@ function MediaThumb({ file, showDownload = true }) {
       </div>
     );
   } else {
-    // Untuk file non-image/video
+    // Untuk file non-image/video - TAMPILAN BARU
     return (
-      <a href={url} download={file.name} className="thumb" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(255,255,255,0.05)',
-        textDecoration: 'none',
-        color: 'var(--text)'
-      }}>
-        <div style={{textAlign: 'center', padding: 8}}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{marginBottom: 4}}>
-            <path d="M12 16L12 4M12 16L8 12M12 16L16 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          <div className="small" style={{wordBreak: 'break-word'}}>{file.name}</div>
-          <div className="small muted">{Math.round(file.size / 1024)} KB</div>
+      <a 
+        href={url} 
+        download={file.name} 
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px',
+          background: 'rgba(255,255,255,0.05)',
+          textDecoration: 'none',
+          color: 'var(--text)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '8px',
+          width: '100%',
+          minWidth: '200px',
+          marginBottom: '8px'
+        }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{marginRight: '10px', flexShrink: 0}}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2"/>
+          <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2"/>
+          <path d="M16 13H8" stroke="currentColor" strokeWidth="2"/>
+          <path d="M16 17H8" stroke="currentColor" strokeWidth="2"/>
+          <path d="M10 9H8" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+        <div style={{textAlign: 'left', overflow: 'hidden'}}>
+          <div className="small" style={{
+            wordBreak: 'break-word',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            fontWeight: '500'
+          }}>
+            {file.name}
+          </div>
+          <div className="small muted">
+            {Math.round(file.size / 1024)} KB
+          </div>
         </div>
       </a>
     );
