@@ -1,38 +1,24 @@
-const CACHE_NAME = 'edutask-v1';
-const urlsToCache = [
-  '/',
-  '/offline.html'
+const version = 3;
+const cacheName = `edutask-v${version}`;
+
+const cacheAssets = [
+  "index.html",
 ];
 
-// Install event
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing.');
+self.addEventListener("install", (event) => {
+  console.log("Service worker is installed");
+
+  /* caching all the assets during install event, this is also known as precaching */
+
+  /* caches.open(cacheName) - this will create a new entry in the cache storage with the given cache name */
+
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+    caches
+      .open(cacheName)
+      .then((cache) => {
+        console.log("Caching assets");
+        cache.addAll(cacheAssets);
+      })
       .then(() => self.skipWaiting())
-  );
-});
-
-// Activate event
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating.');
-  event.waitUntil(self.clients.claim());
-});
-
-// Fetch event
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-      .catch(() => {
-        // Return offline page for document requests
-        if (event.request.destination === 'document') {
-          return caches.match('/offline.html');
-        }
-      })
   );
 });
