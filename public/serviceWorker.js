@@ -1,5 +1,5 @@
 // public/sw.js
-const VERSION = 1;
+const VERSION = 2;
 const CACHE_NAME = `edutask-v${VERSION}`;
 
 // precache: masukkan file di /public yang namanya tidak berubah
@@ -10,6 +10,7 @@ const PRECACHE_ASSETS = [
   "/manifest.json",
   "/robots.txt",
   "/sitemap.xml",
+  "/Screenshot_2025-08-31-06-30-37-12.jpg",
   "/icons/icon_384.png",
   "/icons/icon_512.png",
   "/icons/icon_1024.png",
