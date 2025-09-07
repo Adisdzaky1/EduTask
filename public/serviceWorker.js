@@ -1,5 +1,5 @@
-const VERSION = 3;
-const CACHE_NAME = `portfolio-v${VERSION}`;
+const VERSION = 4;
+const CACHE_NAME = `edutask-v${VERSION}`;
 const PRECACHE_ASSETS = [
   "/",
   "/index.html",
