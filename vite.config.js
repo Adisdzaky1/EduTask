@@ -64,7 +64,7 @@ export default defineConfig({
         // fallback navigation untuk SPA:
         // gunakan index.html (default SPA). Jika mau pakai offline.html untuk route tak ter-cache,
         // ubah navigateFallback ke "/offline.html"
-        navigateFallback: "/index.html",
+        navigateFallback: "/offline.html",
 
         // runtime caching: hanya asset (images/fonts) — **tidak ada** api/restApi
         runtimeCaching: [
