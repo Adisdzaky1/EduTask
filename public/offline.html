@@ -1,22 +1,242 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline Page</title>
+    <title>EduTask - Mode Offline</title>
     <style>
-        html, body {
-            height: 100%;
+        :root {
+            --bg: #0b1020;
+            --card: #11162a;
+            --muted: #9aa4c7;
+            --text: #e8ecff;
+            --brand: #6c8bff;
+            --brand-2: #7ef7d1;
+            --danger: #ff6b6b;
         }
-
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -20%, #17203f 0%, #0b1020 60%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .logo {
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .logo-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: conic-gradient(from 180deg at 50% 50%, var(--brand), var(--brand-2));
+            box-shadow: 0 6px 16px rgba(110, 150, 255, 0.35);
+        }
+        
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+        }
+        
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+        
+        p {
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+        
+        .offline-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+        
+        .offline-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--brand), #4a6bff);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 6px 18px rgba(108, 139, 255, 0.25);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn.ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #dbe2ff;
+        }
+        
+        .tips {
+            text-align: left;
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-left: 3px solid var(--brand);
+        }
+        
+        .tips h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .tips ul {
+            padding-left: 20px;
+        }
+        
+        .tips li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
-<body >
-    <h1>You are offline <span>😔</span></h1>
+<body>
+    <div class="container">
+        <div class="logo">
+            <div class="logo-badge"></div>
+            <div class="logo-text">EduTask</div>
+        </div>
+        
+        <div class="card">
+            <div class="offline-icon">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#6c8bff" stroke-width="4" stroke-dasharray="8 4"/>
+                    <path d="M30 30L70 70M70 30L30 70" stroke="#ff6b6b" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="50" cy="50" r="25" fill="#11162a" stroke="#9aa4c7" stroke-width="2"/>
+                    <path d="M40 40H45V45H40V40ZM55 55H60V60H55V55Z" fill="#7ef7d1"/>
+                </svg>
+            </div>
+            
+            <h1>Anda sedang offline</h1>
+            <p>Sepertinya koneksi internet Anda terputus. Beberapa fitur mungkin tidak tersedia tanpa koneksi.</p>
+            
+            <div class="action-buttons">
+                <button class="btn pulse" onclick="window.location.reload()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Coba Lagi
+                </button>
+                <button class="btn ghost" onclick="history.back()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Kembali
+                </button>
+            </div>
+        </div>
+        
+        <div class="tips">
+            <h3>Tips Mode Offline:</h3>
+            <ul>
+                <li>Pastikan Wi-Fi atau data seluler Anda aktif</li>
+                <li>Periksa mode pesawat pada perangkat Anda</li>
+                <li>Coba restart router atau modem Anda</li>
+                <li>Beberapa tugas yang sudah dibuka mungkin masih dapat diakses</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk memeriksa koneksi
+        function checkConnection() {
+            if (navigator.onLine) {
+                // Jika online, redirect ke halaman utama
+                window.location.href = '/';
+            }
+        }
+        
+        // Periksa koneksi setiap 3 detik
+        setInterval(checkConnection, 3000);
+        
+        // Tambahkan event listener untuk perubahan status koneksi
+        window.addEventListener('online', checkConnection);
+    </script>
 </body>
 </html>
