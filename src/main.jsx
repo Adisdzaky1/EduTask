@@ -10,7 +10,6 @@ createRoot(document.getElementById('root')).render(
       <App />
   </StrictMode>
 )
-
 // register service worker + notifikasi update
 const updateSW = registerSW({
   onNeedRefresh() {
