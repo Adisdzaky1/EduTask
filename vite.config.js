@@ -32,8 +32,8 @@ const manifest = {
   categories: ["books","personalization"]
 };
 
+
 export default defineConfig({
-  base: '/',
   plugins: [
     react(),
     VitePWA({
@@ -58,41 +58,19 @@ export default defineConfig({
       ],
       manifest,
       workbox: {
-        // precache semua asset build sesuai pola
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
 
-        // fallback navigation untuk SPA:
-        // gunakan index.html (default SPA). Jika mau pakai offline.html untuk route tak ter-cache,
-        // ubah navigateFallback ke "/offline.html"
+        // KUNCI: fallback navigation => offline.html
         navigateFallback: "/offline.html",
 
-        // runtime caching: hanya asset (images/fonts) — **tidak ada** api/restApi
-        runtimeCaching: [
-          {
-            // images: cache-first
-            urlPattern: ({ request }) => request.destination === "image",
-            handler: "CacheFirst",
-            options: {
-              cacheName: "images-cache",
-              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] }
-            }
-          },
-          {
-            // fonts: stale-while-revalidate
-            urlPattern: ({ request }) => request.destination === "font",
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: "fonts-cache",
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }
-            }
-          }
-        ]
-      },
+        // pastikan SW mengambil alih klien segera setelah aktif
+        // Workbox generateSW menerima opsi clientsClaim & skipWaiting
+        clientsClaim: true,
+        skipWaiting: true,
 
-      devOptions: {
-        enabled: false // set true hanya jika mau uji PWA di dev server
-      }
+        cleanupOutdatedCaches: true,
+      },
+      devOptions: { enabled: false }
     })
   ]
 });
