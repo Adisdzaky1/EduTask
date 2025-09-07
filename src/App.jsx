@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
 
-  // Buat log error ke console (bisa juga kirim ke server kalau perlu)
+  // Buat log error ke console (bisa juga kirim ke server kalau perlug)
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error", error, errorInfo);
   }
@@ -59,6 +59,7 @@ class ErrorBoundary extends React.Component {
 }
 
 
+
 export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [session, setSession] = useState(null);
@@ -71,80 +72,178 @@ export default function App() {
   const [submissions, setSubmissions] = useState([]);
   const [notifications, setNotifications] = useState([]);
   
-  
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data?.session || null);
-      if (data?.session?.user) await loadProfile(data.session.user.id);
-      setBooting(false);
-      
-      // Jika sudah login, langsung tunjukkan aplikasi
-      if (data?.session) {
-        setShowLanding(false);
+  // Load profile function
+  const loadProfile = useCallback(async (uid) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", uid)
+        .single();
+        
+      if (!error) {
+        setProfile(data);
+        localStorage.setItem(`profile_${uid}`, JSON.stringify(data));
       }
-    })();
+    } catch (error) {
+      // Fallback ke localStorage jika offline
+      const savedProfile = localStorage.getItem(`profile_${uid}`);
+      if (savedProfile) {
+        try {
+          setProfile(JSON.parse(savedProfile));
+        } catch (e) {
+          console.error('Error parsing saved profile', e);
+        }
+      }
+    }
+  }, []);
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      if (s?.user) {
-        loadProfile(s.user.id);
-        setShowLanding(false);
-      } else {
-        setProfile(null);
-        setShowLanding(true);
+  // Fetch functions
+  const fetchTasks = useCallback(async () => {
+    try {
+      const { data } = await supabase.from("tasks").select("*").order("created_at", { ascending: false });
+      if (data) setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  }, []);
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true });
+      if (data) setMessages(data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  }, []);
+
+  const fetchSubmissions = useCallback(async () => {
+    try {
+      const { data } = await supabase.from("submissions").select("*").order("submitted_at", { ascending: false });
+      if (data) setSubmissions(data);
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+    }
+  }, []);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false });
+      if (data) setNotifications(data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  }, []);
+
+  // Main initialization effect
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        // Check for saved session first
+        const savedSession = localStorage.getItem('supabase_session');
+        let sessionData = null;
+        
+        if (savedSession) {
+          try {
+            sessionData = JSON.parse(savedSession);
+            setSession(sessionData);
+            if (sessionData?.user) {
+              await loadProfile(sessionData.user.id);
+            }
+          } catch (e) {
+            console.error('Error parsing saved session', e);
+            localStorage.removeItem('supabase_session');
+          }
+        }
+        
+        // Try to get fresh session from Supabase
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) {
+          sessionData = data.session;
+          localStorage.setItem('supabase_session', JSON.stringify(sessionData));
+          setSession(sessionData);
+          if (sessionData.user) {
+            await loadProfile(sessionData.user.id);
+          }
+        }
+        
+        setBooting(false);
+        
+        if (sessionData) {
+          setShowLanding(false);
+        }
+      } catch (error) {
+        console.error('Error initializing app:', error);
+        setBooting(false);
       }
-    });
-    
+    };
+
+    initializeApp();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          localStorage.setItem('supabase_session', JSON.stringify(session));
+          setSession(session);
+          if (session.user) {
+            await loadProfile(session.user.id);
+          }
+          setShowLanding(false);
+        } else {
+          localStorage.removeItem('supabase_session');
+          setSession(null);
+          setProfile(null);
+          setShowLanding(true);
+        }
+      }
+    );
+
+    // Set up online/offline listeners
+    const handleOnline = () => {
+      fetchTasks();
+      fetchMessages();
+      fetchSubmissions();
+      fetchNotifications();
+      pushToast({ title: 'Online', body: 'Koneksi dipulihkan' });
+    };
+
+    const handleOffline = () => {
+      pushToast({ title: 'Offline', body: 'Mode offline diaktifkan' });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Initial data fetch
     fetchTasks();
     fetchMessages();
     fetchSubmissions();
     fetchNotifications();
-    return () => sub?.subscription.unsubscribe();
-  }, []);
-  
-  
-const fetchTasks = async () => {
-    const { data } = await supabase.from("tasks").select("*").order("created_at", { ascending: false });
-    if (data) setTasks(data);
-  };
 
-  const fetchMessages = async () => {
-    const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true });
-    if (data) setMessages(data);
-  };
+    // Cleanup
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      authListener?.subscription.unsubscribe();
+    };
+  }, [loadProfile, fetchTasks, fetchMessages, fetchSubmissions, fetchNotifications]);
 
-  const fetchSubmissions = async () => {
-    const { data } = await supabase.from("submissions").select("*").order("submitted_at", { ascending: false });
-    if (data) setSubmissions(data);
-  };
-
-  const fetchNotifications = async () => {
-    const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false });
-    if (data) setNotifications(data);
-  };
-
-  // ============================
-  // Realtime listener
-  // ============================
+  // Realtime listeners
   useEffect(() => {
     const channel = supabase.channel("custom-all-channel")
-      // Tasks realtime
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, (payload) => {
         console.log("Task event:", payload);
         fetchTasks();
       })
-      // Messages realtime
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, (payload) => {
         console.log("Message event:", payload);
         fetchMessages();
       })
-      // Submissions realtime
       .on("postgres_changes", { event: "*", schema: "public", table: "submissions" }, (payload) => {
         console.log("Submission event:", payload);
         fetchSubmissions();
       })
-      // Notifications realtime
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, (payload) => {
         console.log("Notification event:", payload);
         fetchNotifications();
@@ -154,26 +253,16 @@ const fetchTasks = async () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchTasks, fetchMessages, fetchSubmissions, fetchNotifications]);
 
-
-  async function loadProfile(uid) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", uid)
-      .single();
-    if (!error) setProfile(data);
+  if (booting) {
+    return <Splash />;
   }
 
-  if (booting) return <Splash />;
-
-  // Tampilkan landing page jika showLanding true
   if (showLanding) {
     return <LandingPage onEnterApp={() => setShowLanding(false)} />;
   }
 
-  // Tampilkan aplikasi jika sudah login
   return (
     <ErrorBoundary>
       <div className="et-root">
@@ -181,6 +270,10 @@ const fetchTasks = async () => {
           profile={profile}
           onLogout={async () => {
             await supabase.auth.signOut();
+            localStorage.removeItem('supabase_session');
+            if (profile?.id) {
+              localStorage.removeItem(`profile_${profile.id}`);
+            }
             setProfile(null);
             setSession(null);
             setSelectedTaskId(null);
@@ -193,8 +286,9 @@ const fetchTasks = async () => {
             <Auth
               onSigned={async () => {
                 const { data } = await supabase.auth.getSession();
-                if (data?.session?.user)
+                if (data?.session?.user) {
                   await loadProfile(data.session.user.id);
+                }
                 setShowLanding(false);
               }}
             />
@@ -231,6 +325,10 @@ const fetchTasks = async () => {
     </ErrorBoundary>
   );
 }
+
+// ... (kode lainnya tetap sama)
+
+    
 
 // -----------------------------------------------------
 // Styles & Animations (mobile-first)
