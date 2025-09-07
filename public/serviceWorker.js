@@ -1,7 +1,10 @@
-const VERSION = 5;
-const CACHE_NAME = `edutask-v${VERSION}`;
+// public/sw.js
+const VERSION = 3;
+const CACHE_NAME = `educahed-v${VERSION}`;
+
+// precache: masukkan file di /public yang namanya tidak berubah
 const PRECACHE_ASSETS = [
-  "/",
+"/",
   "/index.html",
   "/offline.html",    // optional
   "/manifest.json",
@@ -11,88 +14,81 @@ const PRECACHE_ASSETS = [
   "/icons/icon_384.png",
   "/icons/icon_512.png",
   "/icons/icon_1024.png",
-  // tambahkan file statis di public lain jika perlu
 ];
 
+// install -> precache
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing...");
+  console.log("[SW] install");
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE_ASSETS))
+      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .catch((err) => {
+        console.warn("[SW] precache gagal:", err);
+      })
       .then(() => self.skipWaiting())
   );
 });
 
+// activate -> hapus cache lama dan klaim klien
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating...");
+  console.log("[SW] activate");
   event.waitUntil(
-    caches.keys().then(keys =>
+    caches.keys().then((keys) =>
       Promise.all(
-        keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log("[SW] deleting old cache:", key);
+            return caches.delete(key);
+          }
+        })
       )
     ).then(() => self.clients.claim())
   );
 });
 
-
-
-
+// fetch -> strategi:
+// - navigation (HTML): network-first, fallback ke cache (berguna untuk SPA)
+// - asset requests: cache-first
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // hanya GET
+  // only handle GET requests
   if (req.method !== "GET") return;
 
-  // Navigation (HTML)
+  // navigation requests (HTML pages)
   if (req.mode === "navigate") {
     event.respondWith(
-      caches.match(req, { ignoreSearch: true }).then(cached => {
-        if (cached) {
-          return cached; // cache-first
-        }
-        return fetch(req)
-          .then(networkRes => {
-            const clone = networkRes.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-            return networkRes;
-          })
-          .catch(() => caches.match("/offline.html"));
-      })
+      fetch(req)
+        .then((res) => {
+          // jika berhasil, update cache
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          return res;
+        })
+        .catch(() =>
+          caches.match("/offline.html").then((cached) => cached || caches.match("/index.html"))
+        )
     );
     return;
   }
 
-  // Static assets cache-first
+  // for same-origin static assets: cache-first
   if (url.origin === location.origin) {
     event.respondWith(
-      caches.match(req).then(cached => {
+      caches.match(req).then((cached) => {
         if (cached) return cached;
-        return fetch(req).then(networkRes => {
-          const clone = networkRes.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-          return networkRes;
-        });
-      })
-    );
-  }
-  
-  if (event.request.url.includes('supabase.co')) {
-    // Untuk request Supabase, coba cache dulu
-    event.respondWith(
-      caches.match(event.request).then(response => {
-        return response || fetch(event.request).catch(() => {
-          // Fallback ke localStorage untuk session
-          if (event.request.url.includes('auth/v1/token')) {
-            return new Response(
-              JSON.stringify({
-                access_token: localStorage.getItem('supabase_session'),
-                token_type: 'bearer',
-                expires_in: 3600
-              }),
-              { headers: { 'Content-Type': 'application/json' } }
-            );
-          }
+        return fetch(req).then((res) => {
+          // cache furtively (don't block response)
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            // ignore opaque responses if you want
+            try { cache.put(req, resClone); } catch (e) {}
+          });
+          return res;
+        }).catch(() => {
+          // optional: return offline image for images, etc.
+          return caches.match("/offline.html");
         });
       })
     );
