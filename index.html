@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="id">
     <head>
+  <script>
+    (function() {
+      if (typeof navigator !== 'undefined' && !navigator.onLine && 'caches' in window) {
+        // cek apakah offline.html sudah ada di cache (dari SW precache sebelumnya)
+        caches.match('/offline.html').then(function(response) {
+          if (response) {
+            // langsung ganti halaman ke offline.html (replace agar tidak menambah history)
+            window.location.replace('/offline.html');
+          }
+        }).catch(function(){ /* ignore */ });
+      }
+    })();
+  </script>
+
+
+        
         <title>EduTask - Platform Manajemen Tugas Sekolah</title>
         <meta charset="UTF-8">
         <meta name="description" content="EduTask adalah solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah. 100% Gratis.">
