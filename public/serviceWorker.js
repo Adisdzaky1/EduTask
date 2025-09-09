@@ -1,111 +1,86 @@
 // public/sw.js
-const VERSION = 2;
+const VERSION = 2; // naikkan saat update
 const CACHE_NAME = `edutask-cache-v${VERSION}`;
 
 const PRECACHE_ASSETS = [
-  '/',                // sangat penting: root
+  '/',                // root
   '/index.html',
-  '/offline.html',    // halaman fallback saat offline
+  '/offline.html',    // wajib ada
   '/favicon.ico',
   '/manifest.json',
-  // tambahkan file statis lain yang ada di /public, misalnya:
-  // '/styles.css',
-  // '/main.js',
-  // '/icons/icon_192.png',
+  // tambahkan file public lain kalau perlu:
+  // '/styles.css', '/icons/icon_192.png', ...
 ];
 
-// Install: precache assets
-self.addEventListener('install', (event) => {
-  console.log('[SW] install');
+// INSTALL: precache
+self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .then(cache => cache.addAll(PRECACHE_ASSETS))
       .then(() => self.skipWaiting())
-      .catch((err) => {
-        console.error('[SW] precache gagal:', err);
-      })
+      .catch(err => console.error('[SW] precache error', err))
   );
 });
 
-// Activate: hapus cache lama dan ambil alih klien segera
-self.addEventListener('activate', (event) => {
-  console.log('[SW] activate');
+// ACTIVATE: hapus cache lama, klaim client
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[SW] delete old cache', key);
-            return caches.delete(key);
-          }
-        })
-      )
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)))
     ).then(() => self.clients.claim())
   );
 });
 
-// Fetch: strategi
-self.addEventListener('fetch', (event) => {
+// FETCH: strategi navigasi -> cache-first then network then offline.html
+self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // hanya GET yang kita tangani
+  // hanya handle GET
   if (req.method !== 'GET') return;
 
-  // Treat navigation requests (HTML) specially:
-  // - check cache first (ignore search/query)
-  // - if cached -> return cache
-  // - else try network and cache the result
-  // - if network fails -> return /offline.html
+  // Deteksi navigasi (halaman)
   const isNavigation = req.mode === 'navigate' ||
     (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
 
   if (isNavigation) {
     event.respondWith(
-      caches.match(req, { ignoreSearch: true }).then((cached) => {
-        if (cached) {
-          return cached;
-        }
-        // not in cache -> try network
-        return fetch(req)
-          .then((networkRes) => {
-            // cache network response (non-blocking)
-            try {
-              const copy = networkRes.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
-            } catch (e) {
-              // ignore cache put errors
-            }
-            return networkRes;
-          })
-          .catch(() => {
-            // network failed -> fallback ke index.html kalau ada, jika tidak ada -> offline.html
-            return caches.match('/offline.html', { ignoreSearch: true }).then((i) => i || caches.match('/offline.html'));
-          });
+      // 1) coba ambil dari cache (ignore query)
+      caches.match(req, { ignoreSearch: true }).then(cached => {
+        if (cached) return cached;
+
+        // 2) coba network
+        return fetch(req).then(networkRes => {
+          // simpan copy ke cache (non-blocking)
+          try {
+            const copy = networkRes.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+          } catch (e) {}
+          return networkRes;
+        }).catch(() => {
+          // 3) jika network gagal -> fallback ke /offline.html
+          return caches.match('/offline.html', { ignoreSearch: true });
+        });
       })
     );
     return;
   }
 
-  // For other same-origin requests (assets), try cache first, then network
+  // Untuk asset same-origin: cache-first lalu network
   if (url.origin === location.origin) {
     event.respondWith(
-      caches.match(req).then((cached) => {
+      caches.match(req).then(cached => {
         if (cached) return cached;
-        return fetch(req)
-          .then((networkRes) => {
-            // cache non-html assets for future use
-            try {
-              const clone = networkRes.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-            } catch (e) { /* ignore */ }
-            return networkRes;
-          })
-          .catch(() => {
-            // fallback for image or other asset could be /offline.html or nothing
-            // return caches.match('/offline.html');
-            return new Response('', { status: 503, statusText: 'Service Unavailable' });
-          });
+        return fetch(req).then(networkRes => {
+          try {
+            const clone = networkRes.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+          } catch (e) {}
+          return networkRes;
+        }).catch(() => {
+          // fallback kosong untuk asset
+          return new Response('', { status: 503, statusText: 'Service Unavailable' });
+        });
       })
     );
   }
