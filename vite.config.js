@@ -34,43 +34,6 @@ const manifest = {
 
 
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: [
-        "favicon.ico",
-        "robots.txt",
-        "apple-touch-icon.png",
-        // pastikan icon di bawah ada di folder public/icons/
-        "icons/icon_72.png",
-        "icons/icon_96.png",
-        "icons/icon_128.png",
-        "icons/icon_144.png",
-        "icons/icon_152.png",
-        "icons/icon_192.png",
-        "icons/icon_384.png",
-        "icons/icon_512.png",
-        "icons/icon_1024.png",
-        "icons/maskable_192.png",
-        "icons/maskable_512.png",
-        "offline.html"
-      ],
-      manifest,
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
-
-        // KUNCI: fallback navigation => offline.html
-        navigateFallback: "/offline.html",
-
-        // pastikan SW mengambil alih klien segera setelah aktif
-        // Workbox generateSW menerima opsi clientsClaim & skipWaiting
-        clientsClaim: true,
-        skipWaiting: true,
-
-        cleanupOutdatedCaches: true,
-      },
-      devOptions: { enabled: false }
-    })
-  ]
+  plugins: [react()],
+  base: './'
 });
