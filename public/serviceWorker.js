@@ -1,5 +1,5 @@
 // public/sw.js
-const VERSION = 1;
+const VERSION = 2;
 const CACHE_NAME = `edutask-cache-v${VERSION}`;
 
 const PRECACHE_ASSETS = [
