@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
     <head>
-  <script>
+ <!-- <script>
     (function() {
       if (typeof navigator !== 'undefined' && !navigator.onLine && 'caches' in window) {
         // cek apakah offline.html sudah ada di cache (dari SW precache sebelumnya)
@@ -14,9 +14,7 @@
       }
     })();
   </script>
-
-
-        
+-->
         <title>EduTask - Platform Manajemen Tugas Sekolah</title>
         <meta charset="UTF-8">
         <meta name="description" content="EduTask adalah solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah. 100% Gratis.">
@@ -83,7 +81,7 @@
         <script>
             // Cek dulu apakah browser mendukung service worker
             
- /* if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator) {
     window.addEventListener("load", function() {
       navigator.serviceWorker
         .register("/serviceWorker.js", { scope: "/" })
@@ -94,7 +92,7 @@
           console.log("SW registration failed: ", registrationError);
         });
     });
-            }*/
+            }
         </script>
     </body>
 </html>
