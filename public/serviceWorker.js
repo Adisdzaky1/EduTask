@@ -1,8 +1,8 @@
 const VERSION = 7;
 const CACHE_NAME = `edutask-v${VERSION}`;
 const PRECACHE_ASSETS = [
-  "/",
-  "/index.html",
+ /* "/",
+  "/index.html",*/
   "/offline.html",    // optional
   "/manifest.json",
   "/robots.txt",
