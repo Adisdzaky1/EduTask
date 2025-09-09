@@ -6,7 +6,6 @@ const PRECACHE_ASSETS = [
   '/',                // root
   '/index.html',
   '/offline.html',    // wajib ada
-  '/favicon.ico',
   '/manifest.json',
   // tambahkan file public lain kalau perlu:
   // '/styles.css', '/icons/icon_192.png', ...
