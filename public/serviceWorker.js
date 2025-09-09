@@ -80,7 +80,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             // network failed -> fallback ke index.html kalau ada, jika tidak ada -> offline.html
-            return caches.match('/index.html', { ignoreSearch: true }).then((i) => i || caches.match('/offline.html'));
+            return caches.match('/offline.html', { ignoreSearch: true }).then((i) => i || caches.match('/offline.html'));
           });
       })
     );
