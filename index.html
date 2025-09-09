@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html lang="id">
     <head>
- <!-- <script>
-    (function() {
+ <!-- letakkan ini di head, paling atas -->
+<script>
+  (function() {
+    try {
+      // Jika offline dan Cache API tersedia, cek apakah offline.html ada
       if (typeof navigator !== 'undefined' && !navigator.onLine && 'caches' in window) {
-        // cek apakah offline.html sudah ada di cache (dari SW precache sebelumnya)
-        caches.match('/offline.html').then(function(response) {
-          if (response) {
-            // langsung ganti halaman ke offline.html (replace agar tidak menambah history)
+        // cari offline.html di semua cache yang ada
+        caches.keys().then(function(names) {
+          return Promise.all(names.map(name => caches.open(name).then(cache => cache.match('/offline.html'))));
+        }).then(function(results) {
+          // results = array (Response|null); kalau salah satu ada -> redirect
+          var found = results.some(r => !!r);
+          if (found) {
+            // replace supaya tidak menambah history
             window.location.replace('/offline.html');
           }
-        }).catch(function(){ /* ignore */ });
+        }).catch(function(err){
+          // fallback simpel: coba match langsung
+          caches.match('/offline.html').then(function(r) {
+            if (r) window.location.replace('/offline.html');
+          }).catch(()=>{});
+        });
       }
-    })();
-  </script>
--->
+    } catch (e) { /* ignore errors */ }
+  })();
+</script>
+        
         <title>EduTask - Platform Manajemen Tugas Sekolah</title>
         <meta charset="UTF-8">
         <meta name="description" content="EduTask adalah solusi lengkap untuk guru dan siswa dalam mengelola tugas sekolah. Buat kelas, kirim tugas, pantau progres, dan berkolaborasi dengan mudah. 100% Gratis.">
