@@ -633,7 +633,7 @@ function InlineCreateClass({ onCreated }){
 // -----------------------------------------------------
 // Home
 // -----------------------------------------------------
-function Home({ profile, dayjs }){
+function Home({profile}){
   const [className, setClassName] = useState('');
 
   useEffect(() => {
