@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-
 const LandingPage = ({ onEnterApp }) => {
   useEffect(() => {
     // Load external scripts and styles
@@ -56,11 +55,6 @@ const LandingPage = ({ onEnterApp }) => {
 
     initMobileMenu();
     initFAQ();
-    
-    const handleDownloadAPK = (e) => {
-    e.preventDefault();
-    window.open('/edutask.apk', '_blank');
-  };
 
     return () => {
       // Cleanup
@@ -76,6 +70,11 @@ const LandingPage = ({ onEnterApp }) => {
   const handleRegisterClick = (e) => {
     e.preventDefault();
     onEnterApp();
+  };
+
+  const handleDownloadAPK = (e) => {
+    e.preventDefault();
+    window.open('/edutask.apk', '_blank');
   };
 
   // Scroll to section function
@@ -103,7 +102,13 @@ const LandingPage = ({ onEnterApp }) => {
             </nav>
             
             {/* Desktop Action Button */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden md:flex items-center space-x-4">
+              <button onClick={handleDownloadAPK} className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-green-500/50 transition-all transform hover:scale-105 duration-300 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download APK
+              </button>
               <button onClick={handleRegisterClick} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg shadow-lg hover:shadow-indigo-500/50 transition-all transform hover:scale-105 duration-300">
                 Register
               </button>
@@ -125,6 +130,12 @@ const LandingPage = ({ onEnterApp }) => {
             <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md text-left">Kelebihan</button>
             <button onClick={() => scrollToSection('how-it-works')} className="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md text-left">Cara Kerja</button>
             <button onClick={() => scrollToSection('faq')} className="text-gray-600 hover:text-indigo-600 font-medium p-2 rounded-md text-left">FAQ</button>
+            <button onClick={handleDownloadAPK} className="w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold mt-2 py-2 px-5 rounded-lg shadow-lg flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download APK
+            </button>
             <button onClick={handleRegisterClick} className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold mt-2 py-2 px-5 rounded-lg shadow-lg">
               Register
             </button>
@@ -140,17 +151,18 @@ const LandingPage = ({ onEnterApp }) => {
               <span className="inline-block bg-indigo-100 text-indigo-700 text-sm font-semibold px-4 py-1 rounded-full mb-4">✨ 100% Gratis Selamanya</span>
               <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-4">Fokus Mengajar, <br className="hidden md:block" />Bukan Administrasi Tugas</h1>
               <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-600 mb-8">EduTask adalah platform modern yang menyederhanakan cara guru memberikan dan siswa mengerjakan tugas. Terorganisir, efisien, dan tanpa biaya.</p>
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button onClick={handleRegisterClick} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-xl transition-transform transform hover:scale-105 duration-300">
-                Daftar Akun Gratis
-              </button>
-              <button onClick={handleDownloadAPK} className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-xl transition-transform transform hover:scale-105 duration-300 flex items-center gap-2">
+                <button onClick={handleRegisterClick} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-xl transition-transform transform hover:scale-105 duration-300">
+                  Daftar Akun Gratis
+                </button>
+                <button onClick={handleDownloadAPK} className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-xl transition-transform transform hover:scale-105 duration-300 flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Download APK
                 </button>
-                </div>
+              </div>
             </div>
             <div data-aos="fade-up" data-aos-delay="200" className="mt-16">
               <img src="https://edutask-app.vercel.app/Screenshot_2025-08-31-06-30-37-12.jpg" alt="Dasbor EduTask" className="rounded-2xl shadow-2xl mx-auto ring-1 ring-gray-200 max-w-full h-auto" />
@@ -288,17 +300,18 @@ const LandingPage = ({ onEnterApp }) => {
             <div className="bg-indigo-600 rounded-2xl p-8 md:p-12 text-center" data-aos="zoom-in">
               <h2 className="text-3xl md:text-4xl font-bold text-white">Siap Mengubah Cara Anda Mengelola Tugas?</h2>
               <p className="text-lg text-indigo-200 mt-4 max-w-2xl mx-auto">Buat akun gratis Anda sekarang dan rasakan kemudahannya. Hanya butuh kurang dari satu menit untuk memulai.</p>
-               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <button onClick={handleRegisterClick} className="mt-8 inline-block bg-white hover:bg-gray-100 text-indigo-600 font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
-                Mulai Gratis Sekarang
-              </button>
-              <button onClick={handleDownloadAPK} className="bg-transparent hover:bg-white text-white hover:text-indigo-600 font-bold py-3 px-8 rounded-full shadow-lg border-2 border-white transition-transform transform hover:scale-105 duration-300 flex items-center gap-2">
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <button onClick={handleRegisterClick} className="bg-white hover:bg-gray-100 text-indigo-600 font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
+                  Mulai Gratis Sekarang
+                </button>
+                <button onClick={handleDownloadAPK} className="bg-transparent hover:bg-white text-white hover:text-indigo-600 font-bold py-3 px-8 rounded-full shadow-lg border-2 border-white transition-transform transform hover:scale-105 duration-300 flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Download APK
                 </button>
-                </div>
+              </div>
             </div>
           </div>
         </section>
