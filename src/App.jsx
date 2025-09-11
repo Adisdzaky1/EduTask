@@ -942,7 +942,7 @@ function Login({ onSigned }){
         });
         
         if (error) {
-          setErr('Login gagal. Pastikan username dan password benar.');
+          setErr(`Login gagal. Pastikan username dan password benar.\n${error}`);
         } else {
           onSigned();
         }
