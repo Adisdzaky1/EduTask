@@ -252,7 +252,7 @@ const fetchTasks = async () => {
                <NotificationsPage 
               profile={profile} 
               dayjs={dayjs}
-              onTaskSelect={handleTaskSelectFromNotification}
+              onTaskSelect={handleTaskSelectFromNotification} />
               )}
               {tab === "admin" && <AdminOrProfile profile={profile} />}
             </>
