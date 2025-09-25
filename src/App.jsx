@@ -709,7 +709,7 @@ function Home({profile}){
 // -----------------------------------------------------
 // Tasks Page
 // -----------------------------------------------------
-function TasksPage({ profile, onTaskSelect }){
+async function TasksPage({ profile, onTaskSelect }){
   const [tasks, setTasks] = useState([]);
   const [q, setQ] = useState('');
   const [cats, setCats] = useState([]);
