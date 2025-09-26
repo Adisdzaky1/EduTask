@@ -709,7 +709,7 @@ function Home({profile}){
 // -----------------------------------------------------
 // Tasks Page
 // -----------------------------------------------------
-async function TasksPage({ profile, onTaskSelect }){
+/*async function TasksPage({ profile, onTaskSelect }){
   const [tasks, setTasks] = useState([]);
   const [q, setQ] = useState('');
   const [cats, setCats] = useState([]);
@@ -861,8 +861,331 @@ async function TasksPage({ profile, onTaskSelect }){
     </div>
   );
 }
+*/
+
+// -----------------------------------------------------
+// Tasks Page (Fixed Version)
+// -----------------------------------------------------
+function TasksPage({ profile, onTaskSelect }){
+  const [tasks, setTasks] = useState([]);
+  const [q, setQ] = useState('');
+  const [cats, setCats] = useState([]);
+  const [filterCat, setFilterCat] = useState('');
+  const [filterPrio, setFilterPrio] = useState('');
+  const [classes, setClasses] = useState([]);
+  const [userSubmissions, setUserSubmissions] = useState([]);
+  const [classStudents, setClassStudents] = useState({});
+  const [taskProgress, setTaskProgress] = useState({});
+
+  useEffect(() => { 
+    load(); 
+    const sub = supabase.channel('realtime:tasks')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => load())
+      .subscribe(); 
+    return () => supabase.removeChannel(sub); 
+  }, []);
+
+  // Fungsi untuk mendapatkan progress (TANPA await di return)
+  const getTaskProgress = async (taskId, classId) => {
+    const { count: submittedCount } = await supabase
+      .from('submissions')
+      .select('*', { count: 'exact' })
+      .eq('task_id', taskId);
+
+    const totalStudents = classStudents[classId] || 0;
+    return { submitted: submittedCount || 0, total: totalStudents };
+  };
+
+  // Load progress untuk semua task ketika data berubah
+  useEffect(() => {
+    if (profile.role !== 'teacher' || tasks.length === 0) return;
+
+    const loadProgress = async () => {
+      const progressMap = {};
+      for (const task of tasks) {
+        if (task.id && task.class_id) {
+          try {
+            const progress = await getTaskProgress(task.id, task.class_id);
+            progressMap[task.id] = progress;
+          } catch (error) {
+            console.error('Error loading progress for task:', task.id, error);
+            progressMap[task.id] = { submitted: 0, total: 0 };
+          }
+        }
+      }
+      setTaskProgress(progressMap);
+    };
+
+    loadProgress();
+  }, [tasks, classStudents, profile.role]);
+
+  async function load(){
+    // Load tasks
+    const { data:t } = await supabase.from('tasks')
+      .select('*, categories:category_id(name), classes:class_id(name)')
+      .order('created_at', { ascending: false });
+
+    // Load user submissions
+    const { data: subs } = await supabase.from('submissions')
+      .select('*')
+      .eq('student_id', profile.id);
+
+    setTasks(t || []); 
+    setUserSubmissions(subs || []);
+
+    // Load categories and classes
+    const { data: c } = await supabase.from('categories').select('*').order('name');
+    const { data: cs } = await supabase.from('classes').select('*').order('name');
+    setCats(c || []); 
+    setClasses(cs || []);
+
+    // For teachers, load student counts for each class
+    if (profile.role === 'teacher') {
+      const studentCounts = {};
+      for (const cls of cs || []) {
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact' })
+          .eq('class_id', cls.id)
+          .eq('role', 'student');
+        studentCounts[cls.id] = count || 0;
+      }
+      setClassStudents(studentCounts);
+    }
+  }
+
+  // Fungsi untuk mendapatkan status tugas (untuk siswa)
+  const getTaskStatus = (taskId) => {
+    const submission = userSubmissions.find(sub => sub.task_id === taskId);
+    if (submission) {
+      return {
+        status: 'submitted',
+        grade: submission.grade
+      };
+    }
+    return { status: 'pending' };
+  };
+
+  const deleteTask = async (taskId) => {
+    try {
+      // Hapus submissions terkait terlebih dahulu
+      await supabase.from('submissions').delete().eq('task_id', taskId);
+      
+      // Hapus messages terkait
+      await supabase.from('messages').delete().eq('task_id', taskId);
+      
+      // Hapus task
+      const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+      
+      if (error) {
+        console.error('Error deleting task:', error);
+        pushToast({ title: 'Gagal menghapus tugas', body: error.message });
+      } else {
+        pushToast({ title: 'Berhasil', body: 'Tugas dihapus' });
+        load(); // Reload tasks
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      pushToast({ title: 'Error', body: 'Gagal menghapus tugas' });
+    }
+  };
+
+  const shown = useMemo(()=> tasks.filter(x=>{
+    if (profile.role==='student' && profile.class_id && x.class_id!==profile.class_id) return false;
+    if (q && !(`${x.title} ${x.description}`.toLowerCase().includes(q.toLowerCase()))) return false;
+    if (filterCat && x.category_id!==filterCat) return false;
+    if (filterPrio && x.priority!==filterPrio) return false;
+    return true;
+  }), [tasks,q,filterCat,filterPrio,profile]);
+
+  return (
+    <div className="col">
+      <div className="card pop" style={{padding:12}}>
+        <div className="row" style={{gap:8,flexWrap:'wrap'}}>
+          <input placeholder="Cari tugas..." value={q} onChange={e=>setQ(e.target.value)} />
+          <select value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
+            <option value="">Kategori</option>
+            {cats.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <select value={filterPrio} onChange={e=>setFilterPrio(e.target.value)}>
+            <option value="">Prioritas</option>
+            <option value="high">High</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+          </select>
+          {profile.role==='teacher' && <CreateTaskButton classes={classes} cats={cats} onCreated={load}/>}        
+        </div>
+      </div>
+
+      <div className="col">
+        {shown.map(t=> 
+          t.id ? (
+            <TaskCard 
+              key={t.id} 
+              task={t} 
+              profile={profile}
+              status={profile.role === 'student' ? getTaskStatus(t.id) : null}
+              progress={profile.role === 'teacher' ? taskProgress[t.id] : null}
+              onOpen={()=>onTaskSelect(t.id)} 
+              onDelete={deleteTask}
+            />
+          ) : null
+        )}
+        {shown.length===0 && <div className="muted small">Tidak ada tugas.</div>}
+      </div>
+    </div>
+  );
+}
 
 function TaskCard({ task, onOpen, profile, onDelete, status, progress }){
+  return (
+    <div className="item card slideUp" style={{
+      cursor: 'pointer', 
+      position: 'relative',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      borderRadius: '14px',
+      padding: '16px',
+      marginBottom: '12px',
+      background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.2s ease'
+    }}>
+      <div className="row" style={{justifyContent:'space-between', alignItems: 'flex-start'}}>
+        <div style={{flex: 1}} onClick={onOpen}>
+          <div className="title" style={{marginBottom: '8px', fontSize: '16px', fontWeight: '600'}}>
+            {task.title}
+          </div>
+          <div className="small muted" style={{
+            marginBottom: '12px',
+            lineHeight: '1.4',
+            display: '-webkit-box',
+            WebkitLineClamp: '2',
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}>
+            {task.description?.slice(0,120)}
+          </div>
+          
+          {/* Informasi tambahan */}
+          <div className="row" style={{gap: '6px', flexWrap: 'wrap'}}>
+            <span className="badge" style={{
+              background: 'rgba(108, 139, 255, 0.12)',
+              borderColor: 'rgba(108, 139, 255, 0.25)',
+              color: '#6c8bff',
+              fontSize: '11px',
+              padding: '4px 8px'
+            }}>
+              {task.categories?.name || 'Umum'}
+            </span>
+            
+            <span className="badge" style={{
+              background: task.priority === 'high' ? 'rgba(255, 107, 107, 0.12)' : 
+                         task.priority === 'normal' ? 'rgba(255, 171, 0, 0.12)' : 'rgba(126, 247, 209, 0.12)',
+              borderColor: task.priority === 'high' ? 'rgba(255, 107, 107, 0.25)' : 
+                          task.priority === 'normal' ? 'rgba(255, 171, 0, 0.25)' : 'rgba(126, 247, 209, 0.25)',
+              color: task.priority === 'high' ? '#ff6b6b' : 
+                    task.priority === 'normal' ? '#ffab00' : '#7ef7d1',
+              fontSize: '11px',
+              padding: '4px 8px'
+            }}>
+              {task.priority === 'high' ? 'Tinggi' : 
+               task.priority === 'normal' ? 'Normal' : 'Rendah'}
+            </span>
+            
+            {task.due_at && (
+              <span className="badge" style={{
+                background: 'rgba(255, 255, 255, 0.06)',
+                borderColor: 'rgba(255, 255, 255, 0.12)',
+                color: 'var(--muted)',
+                fontSize: '11px',
+                padding: '4px 8px'
+              }}>
+                Due: {dayjs(task.due_at).format('DD MMM HH:mm')}
+              </span>
+            )}
+          </div>
+          
+          {/* Status Pengumpulan - untuk Siswa */}
+          {profile.role === 'student' && (
+            <div style={{marginTop: '8px'}}>
+              {status && status.status === 'submitted' ? (
+                <span className="badge" style={{
+                  background: 'rgba(126, 247, 209, 0.12)',
+                  borderColor: 'rgba(126, 247, 209, 0.25)',
+                  color: '#7ef7d1',
+                }}>
+                  ✅ Terkumpul {status.grade !== null ? `- Nilai: ${status.grade}` : ''}
+                </span>
+              ) : (
+                <span className="badge" style={{
+                  background: 'rgba(255, 107, 107, 0.12)',
+                  borderColor: 'rgba(255, 107, 107, 0.25)',
+                  color: '#ff6b6b',
+                }}>
+                  ❌ Belum dikumpulkan
+                </span>
+              )}
+            </div>
+          )}
+          
+          {/* Status Pengumpulan - untuk Guru */}
+          {profile.role === 'teacher' && progress && (
+            <div style={{marginTop: '8px'}}>
+              <span className="badge" style={{
+                background: 'rgba(108, 139, 255, 0.12)',
+                borderColor: 'rgba(108, 139, 255, 0.25)',
+                color: '#6c8bff',
+              }}>
+                📊 {progress.submitted}/{progress.total} siswa mengumpulkan
+              </span>
+            </div>
+          )}
+          
+          {profile.role === 'teacher' && task.classes && (
+            <div className="small muted" style={{marginTop: '8px'}}>
+              Kelas: {task.classes.name}
+            </div>
+          )}
+        </div>
+        
+        <div className="col" style={{alignItems:'flex-end', gap: '8px'}}>
+          {profile.role === 'teacher' && (
+            <button 
+              className="btn ghost" 
+              style={{
+                padding: '6px 10px', 
+                fontSize: '12px',
+                background: 'rgba(255, 107, 107, 0.1)',
+                borderColor: 'rgba(255, 107, 107, 0.2)',
+                color: '#ff6b6b'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm('Hapus tugas ini?')) onDelete(task.id);
+              }}
+            >
+              Hapus
+            </button>
+          )}
+          
+          <div className="small muted" style={{textAlign: 'right'}}>
+            {dayjs(task.created_at).format('DD MMM')}
+          </div>
+        </div>
+      </div>
+      
+      {/* Garis pemisah dekoratif */}
+      <div style={{
+        height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+        marginTop: '12px'
+      }}></div>
+    </div>
+  );
+}
+
+
+function TaskCardhdhd({ task, onOpen, profile, onDelete, status, progress }){
   return (
     <div className="item card slideUp" style={{
       cursor: 'pointer', 
