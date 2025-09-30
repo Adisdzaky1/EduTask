@@ -1567,8 +1567,620 @@ function CreateTaskButton({ classes, cats, onCreated }){
 // -----------------------------------------------------
 // Task Detail Page (New Component)
 // -----------------------------------------------------
-
 function TaskDetailPage({ taskId, profile, dayjs, onBack }) {
+  const [task, setTask] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [subs, setSubs] = useState([]);
+  const [msg, setMsg] = useState('');
+  const [text, setText] = useState('');
+  const [files, setFiles] = useState([]);
+  const [taskFiles, setTaskFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const messagesContainerRef = useRef(null);
+
+  // Fungsi untuk scroll otomatis ke pesan terbaru
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Load task details
+  useEffect(() => {
+    if (!taskId) return;
+
+    const loadTask = async () => {
+      try {
+        const { data, error } = await supabase.from('tasks')
+          .select('*, categories:category_id(name), classes:class_id(name)')
+          .eq('id', taskId)
+          .single();
+        
+        if (error) {
+          console.error('Error loading task:', error);
+          return;
+        }
+        setTask(data);
+      } catch (error) {
+        console.error('Error in loadTask:', error);
+      }
+    };
+
+    loadTask();
+  }, [taskId]);
+
+  // Load messages
+  const loadMessages = useCallback(async () => {
+    if (!taskId) return;
+
+    try {
+      const { data, error } = await supabase.from('messages')
+        .select('*, profiles:sender_id(username, role)')
+        .eq('task_id', taskId)
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error('Error loading messages:', error);
+        return;
+      }
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error in loadMessages:', error);
+    }
+  }, [taskId]);
+
+  // Load submissions
+  const loadSubs = useCallback(async () => {
+    if (!taskId) return;
+    
+    try {
+      let query = supabase
+        .from('submissions')
+        .select(`*, profiles:student_id(username)`)
+        .eq('task_id', taskId);
+
+      const { data, error } = await query.order('submitted_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error loading submissions:', error);
+        return;
+      }
+      
+      // Pisahkan file tugas dari guru dan submission siswa
+      const teacherFiles = [];
+      const studentSubmissions = [];
+      
+      (data || []).forEach(item => {
+        if (item.student_id === null) {
+          // Ini adalah file dari guru
+          if (Array.isArray(item.files)) {
+            teacherFiles.push(...item.files);
+          }
+        } else {
+          // Ini adalah submission siswa
+          // Untuk siswa, hanya tampilkan submission milik sendiri
+          if (profile.role === 'student' && item.student_id !== profile.id) {
+            return; // Skip submission siswa lain
+          }
+          studentSubmissions.push(item);
+        }
+      });
+      
+      setTaskFiles(teacherFiles);
+      setSubs(studentSubmissions);
+    } catch (error) {
+      console.error('Error in loadSubs:', error);
+    }
+  }, [taskId, profile.id, profile.role]);
+
+  // Load semua data saat komponen mount
+  useEffect(() => {
+    if (!taskId) return;
+
+    const loadAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        loadMessages(),
+        loadSubs()
+      ]);
+      setLoading(false);
+    };
+
+    loadAllData();
+  }, [taskId, loadMessages, loadSubs]);
+
+  // Realtime listeners - DIPERBAIKI
+  useEffect(() => {
+    if (!taskId) return;
+
+    // Channel untuk messages
+    const messagesChannel = supabase
+      .channel(`task-messages-${taskId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `task_id=eq.${taskId}`
+        },
+        (payload) => {
+          console.log('Message update received:', payload);
+          loadMessages(); // Reload messages
+        }
+      )
+      .subscribe((status) => {
+        console.log('Messages channel status:', status);
+      });
+
+    // Channel untuk submissions
+    const submissionsChannel = supabase
+      .channel(`task-submissions-${taskId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'submissions',
+          filter: `task_id=eq.${taskId}`
+        },
+        (payload) => {
+          console.log('Submission update received:', payload);
+          loadSubs(); // Reload submissions
+        }
+      )
+      .subscribe((status) => {
+        console.log('Submissions channel status:', status);
+      });
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(submissionsChannel);
+    };
+  }, [taskId, loadMessages, loadSubs]);
+
+  const send = async () => {
+    if (!msg.trim() || !taskId) return;
+    
+    try {
+      const { error } = await supabase.from('messages').insert({
+        task_id: taskId,
+        sender_id: profile.id,
+        text: msg.trim()
+      });
+      
+      if (error) {
+        console.error('Error sending message:', error);
+        pushToast({ title: 'Error', body: 'Gagal mengirim pesan' });
+        return;
+      }
+      
+      setMsg('');
+      pushToast({ title: 'Berhasil', body: 'Pesan terkirim' });
+    } catch (error) {
+      console.error('Error in send:', error);
+      pushToast({ title: 'Error', body: 'Gagal mengirim pesan' });
+    }
+  };
+
+  const pick = (e) => {
+    const list = Array.from(e.target.files || []);
+    const validFiles = list.filter(f => {
+      if (f.size > 45 * 1024 * 1024) {
+        alert(`File ${f.name} terlalu besar (max 45MB)`);
+        return false;
+      }
+      return true;
+    });
+    setFiles(validFiles);
+  };
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const submit = async () => {
+    if (!taskId || !task) return;
+    
+    // Validasi: setidaknya ada text atau file
+    if (!text.trim() && files.length === 0) {
+      pushToast({ title: 'Peringatan', body: 'Masukkan catatan atau lampirkan file' });
+      return;
+    }
+    
+    try {
+      const uploaded = [];
+      
+      // Upload files jika ada
+      for (const f of files) {
+        const path = `${taskId}/${profile.id}/${Date.now()}-${f.name}`;
+        const { error } = await supabase.storage.from('uploads').upload(path, f, { upsert: false });
+        if (!error) {
+          uploaded.push({ path, name: f.name, size: f.size });
+        } else {
+          console.error('Error uploading file:', error);
+        }
+      }
+      
+      // Insert submission
+      const { error } = await supabase.from('submissions').insert({
+        task_id: taskId,
+        student_id: profile.id,
+        text: text.trim() || null,
+        files: uploaded.length > 0 ? uploaded : null
+      });
+      
+      if (error) {
+        console.error('Error submitting task:', error);
+        pushToast({ title: 'Error', body: 'Gagal mengirim tugas' });
+        return;
+      }
+      
+      setText('');
+      setFiles([]);
+      pushToast({ title: 'Berhasil', body: 'Tugas berhasil dikirim' });
+    } catch (error) {
+      console.error('Error in submit:', error);
+      pushToast({ title: 'Error', body: 'Gagal mengirim tugas' });
+    }
+  };
+
+  const grade = async (submissionId, value) => {
+    if (!submissionId) return;
+    
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue) || numericValue < 0) {
+      pushToast({ title: 'Error', body: 'Nilai harus angka positif' });
+      return;
+    }
+    
+    const finalValue = Math.min(numericValue, 100);
+    
+    try {
+      const { error } = await supabase.from('submissions')
+        .update({ grade: finalValue })
+        .eq('id', submissionId);
+      
+      if (error) {
+        console.error('Error updating grade:', error);
+        pushToast({ title: 'Error', body: 'Gagal memperbarui nilai' });
+        return;
+      }
+      
+      pushToast({ title: 'Berhasil', body: `Nilai diperbarui: ${finalValue}` });
+    } catch (error) {
+      console.error('Error in grade:', error);
+      pushToast({ title: 'Error', body: 'Gagal memperbarui nilai' });
+    }
+  };
+
+  if (!task && !loading) {
+    return (
+      <div className="card pop" style={{padding: 12}}>
+        <div className="row" style={{justifyContent: 'space-between', alignItems: 'center'}}>
+          <button className="btn ghost" onClick={onBack}>&larr; Kembali</button>
+          <div className="title">Tugas tidak ditemukan</div>
+          <div style={{width: 80}}></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="card pop" style={{padding: 12}}>
+        <div className="row" style={{justifyContent: 'space-between', alignItems: 'center'}}>
+          <button className="btn ghost" onClick={onBack}>&larr; Kembali</button>
+          <div className="title">Memuat...</div>
+          <div style={{width: 80}}></div>
+        </div>
+        <div className="small muted" style={{textAlign: 'center', padding: '20px'}}>
+          Memuat data tugas...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="col">
+      <div className="card pop" style={{padding:12}}>
+        <div className="row" style={{justifyContent:'space-between', alignItems: 'center'}}>
+          <button className="btn ghost" onClick={onBack}>&larr; Kembali</button>
+          <div className="title" style={{textAlign: 'center', flex: 1}}>{task?.title}</div>
+          <div style={{width: 80}}></div>
+        </div>
+
+        {task && (
+          <div className="small muted" style={{marginTop: 8, textAlign: 'center'}}>
+            Due: {task.due_at ? dayjs(task.due_at).format('DD MMM YYYY HH:mm') : '-'} • 
+            Prioritas: {task.priority} • 
+            Kelas: {task.classes?.name || task.class?.name || '-'}
+          </div>
+        )}
+
+        {/* Tampilkan konten text tugas jika ada */}
+        {task?.content && (
+          <div className="card" style={{padding:12, marginTop:12}}>
+            <div className="title">Konten Tugas</div>
+            <div style={{whiteSpace: 'pre-wrap', marginTop:8, lineHeight: '1.5'}}>
+              {task.content}
+            </div>
+          </div>
+        )}
+
+        {/* Tampilkan file dari guru - TERBUKA UNTUK SEMUA ROLE */}
+        {taskFiles.length > 0 && (
+          <div className="card" style={{padding:12, marginTop:12}}>
+            <div className="title">File Tugas dari Guru</div>
+            <div className="thumbs" style={{marginTop:10}}>
+              {taskFiles.map((f,i) => 
+                f?.path ? <MediaThumb key={i} file={f} showDownload={true} /> : null
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-2" style={{marginTop:12, gap: '16px'}}>
+          {/* Diskusi Section */}
+          <div className="card" style={{padding:12}}>
+            <div className="title">Diskusi</div>
+            <div 
+              ref={messagesContainerRef} 
+              style={{
+                maxHeight: '280px',
+                overflow: 'auto',
+                marginTop: '8px',
+                padding: '8px',
+                background: 'rgba(255,255,255,0.02)',
+                borderRadius: '8px'
+              }}
+            >
+              {messages.length === 0 ? (
+                <div className="muted small" style={{textAlign: 'center', padding: '20px'}}>
+                  Belum ada pesan
+                </div>
+              ) : (
+                messages.map(m => (
+                  <div key={m.id} className="item" style={{
+                    marginBottom: '12px',
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '8px'
+                  }}>
+                    <div className="small muted">
+                      <strong>{m.profiles?.username || 'Unknown'}</strong>
+                      {m.profiles?.role === 'teacher' && (
+                        <span className="badge" style={{
+                          marginLeft: '8px', 
+                          background: 'rgba(108, 139, 255, 0.12)', 
+                          borderColor: 'rgba(108, 139, 255, 0.25)',
+                          color: '#6c8bff',
+                          fontSize: '10px'
+                        }}>
+                          Guru
+                        </span>
+                      )}
+                      <span style={{marginLeft: '8px'}}>
+                        {dayjs(m.created_at).format('DD MMM HH:mm')}
+                      </span>
+                    </div>
+                    <div style={{marginTop: '6px', wordBreak: 'break-word'}}>{m.text}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="row" style={{marginTop:12, gap: '8px'}}>
+              <input 
+                placeholder="Tulis pesan..." 
+                value={msg} 
+                onChange={e=>setMsg(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                style={{flex: 1}}
+              />
+              <button className="btn" onClick={send} disabled={!msg.trim()}>
+                Kirim
+              </button>
+            </div>
+          </div>
+
+          {/* Pengumpulan Section */}
+          <div className="card" style={{padding:12}}>
+            {profile.role === 'student' ? (
+              <>
+                <div className="title">Kirim Tugas</div>
+                
+                {/* Tampilkan status pengumpulan terakhir */}
+                {subs.length > 0 && (
+                  <div className="item" style={{
+                    background: 'rgba(126, 247, 209, 0.1)',
+                    border: '1px solid rgba(126, 247, 209, 0.2)',
+                    marginBottom: '12px'
+                  }}>
+                    <div className="small muted">
+                      Terakhir dikumpulkan: {dayjs(subs[0].submitted_at).format('DD MMM HH:mm')}
+                    </div>
+                    {subs[0].grade !== null && (
+                      <div style={{marginTop: '8px'}}>
+                        <div className="title" style={{color: '#7ef7d1', fontSize: '16px'}}>
+                          Nilai: {subs[0].grade}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <textarea 
+                  placeholder="Catatan (opsional)" 
+                  value={text} 
+                  onChange={e=>setText(e.target.value)}
+                  rows={4}
+                />
+                
+                {/* File yang dipilih */}
+                {files.length > 0 && (
+                  <div style={{marginTop: '8px'}}>
+                    <div className="small muted">File terpilih:</div>
+                    {files.map((file, index) => (
+                      <div key={index} className="row" style={{
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        padding: '8px',
+                        background: 'rgba(255,255,255,0.03)',
+                        borderRadius: '6px',
+                        marginTop: '4px'
+                      }}>
+                        <span className="small" style={{flex: 1, wordBreak: 'break-word'}}>
+                          {file.name}
+                        </span>
+                        <button 
+                          type="button" 
+                          className="btn ghost" 
+                          style={{padding: '4px 8px', fontSize: '12px'}}
+                          onClick={() => removeFile(index)}
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <input 
+                  type="file" 
+                  multiple 
+                  onChange={pick} 
+                  style={{marginTop: '8px'}}
+                />
+                <div className="small muted" style={{marginTop: '4px'}}>
+                  Maksimal 45MB per file
+                </div>
+                
+                <div className="row" style={{justifyContent:'flex-end', marginTop:12}}>
+                  <button 
+                    className="btn" 
+                    onClick={submit} 
+                    disabled={!text.trim() && files.length === 0}
+                  >
+                    {subs.length > 0 ? 'Update Pengumpulan' : 'Kirim Tugas'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="title">Pengumpulan Siswa</div>
+                <div className="small muted" style={{marginBottom: '12px'}}>
+                  {subs.length} siswa mengumpulkan
+                </div>
+              </>
+            )}
+            
+            <div className="col" style={{marginTop: '12px', maxHeight: '300px', overflow: 'auto'}}>
+              {subs.length === 0 ? (
+                <div className="muted small" style={{textAlign: 'center', padding: '20px'}}>
+                  {profile.role === 'student' ? 'Belum ada pengumpulan' : 'Belum ada siswa yang mengumpulkan'}
+                </div>
+              ) : (
+                subs.map(s => (
+                  <div key={s.id} className="item" style={{
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '8px',
+                    marginBottom: '8px'
+                  }}>
+                    <div className="small muted">
+                      <strong>{s.profiles?.username || 'Unknown'}</strong> • 
+                      {dayjs(s.submitted_at).format('DD MMM HH:mm')}
+                    </div>
+                    
+                    {s.text && (
+                      <div style={{marginTop: '8px', padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px'}}>
+                        {s.text}
+                      </div>
+                    )}
+                    
+                    {Array.isArray(s.files) && s.files.length > 0 && (
+                      <div className="thumbs" style={{marginTop: '8px'}}>
+                        {s.files.map((f,i) => 
+                          f?.path ? <MediaThumb key={i} file={f} showDownload={true} /> : null
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Input nilai untuk guru */}
+                    {profile.role === 'teacher' && (
+                      <div className="row" style={{marginTop: '12px', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <div className="small">
+                          Nilai: <strong>{s.grade !== null ? s.grade : '-'}</strong>/100
+                        </div>
+                        
+                        <div className="row" style={{alignItems: 'center', gap: '8px'}}>
+                          <input 
+                            type="number" 
+                            className="small" 
+                            placeholder="0-100" 
+                            min="0"
+                            max="100"
+                            onBlur={e => grade(s.id, e.target.value)} 
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                grade(s.id, e.target.value);
+                                e.target.blur();
+                              }
+                            }}
+                            style={{
+                              width: '70px',
+                              padding: '6px 8px',
+                              textAlign: 'center'
+                            }}
+                          />
+                          <button 
+                            className="btn ghost" 
+                            style={{padding: '6px 8px', fontSize: '12px'}}
+                            onClick={() => {
+                              const input = document.querySelector(`input[type="number"]`);
+                              if (input) grade(s.id, input.value);
+                            }}
+                          >
+                            Simpan
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Tampilkan nilai untuk siswa */}
+                    {profile.role === 'student' && s.grade !== null && (
+                      <div style={{
+                        marginTop: '8px',
+                        padding: '8px',
+                        background: 'rgba(108, 139, 255, 0.1)',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}>
+                        <div className="small">Nilai: <strong>{s.grade}</strong>/100</div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TaskDetailgggPage({ taskId, profile, dayjs, onBack }) {
   const [task, setTask] = useState(null);
   const [messages, setMessages] = useState([]);
   const [subs, setSubs] = useState([]);
